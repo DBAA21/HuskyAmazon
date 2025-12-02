@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Husky Amazon - Shopping Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-light">
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-nowrap" href="/">🐶 Husky Amazon</a>
+        <!-- 搜索框 -->
+        <form class="d-flex mx-auto" action="/search" method="get" style="width: 50%;">
+            <input class="form-control" type="search" name="keyword"
+                   placeholder="Search products..." th:value="${searchKeyword}">
+            <button class="btn btn-warning" type="submit">Search</button>
+        </form>
+
+        <!-- 右侧菜单 (⭐ 已更新) -->
+        <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item"><a class="nav-link text-nowrap" href="/">Home</a></li>
+            <!-- ⭐ Cart 设为 active -->
+            <li class="nav-item"><a class="nav-link active text-nowrap" href="/cart">Cart 🛒</a></li>
+
+            <th:block th:if="${session.currentUser == null}">
+                <li class="nav-item"><a class="nav-link text-nowrap" href="/login">Login</a></li>
+            </th:block>
+
+            <th:block th:if="${session.currentUser != null}">
+                <li class="nav-item ms-3"><a class="nav-link text-nowrap" href="/order/history">Orders</a></li>
+                <li class="nav-item ms-3 me-3">
+                    <a class="nav-link text-nowrap" href="/profile">
+                        Hi, <span class="fw-bold" th:text="${session.currentUser.username}">User</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-danger btn-sm text-nowrap" href="/logout">Logout</a>
+                </li>
+            </th:block>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="mb-4">Your Shopping Cart</h2>
+
+    <!-- 空购物车提示 -->
+    <div th:if="${cart.items.isEmpty()}" class="alert alert-warning text-center">
+        <h4>Your cart is empty!</h4>
+        <a href="/" class="btn btn-primary mt-3">Go Shopping</a>
+    </div>
+
+    <!-- 购物车列表 (保持不变) -->
+    <div th:unless="${cart.items.isEmpty()}" class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-3" th:each="item : ${cart.items}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://via.placeholder.com/80'}"
+                                 class="rounded me-3" style="width: 80px; height: 80px; object-fit: contain;">
+                            <div>
+                                <h5 class="card-title mb-1" th:text="${item.product.name}">Product Name</h5>
+                                <p class="text-muted mb-0">Unit Price: $<span th:text="${item.product.price}">99.9</span></p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">Qty: <span th:text="${item.quantity}">1</span></span>
+                            </div>
+                            <a th:href="@{'/cart/remove/' + ${item.id}}" class="btn btn-outline-danger btn-sm">Remove</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Items:</span>
+                        <span class="fw-bold" th:text="${cart.items.size()}">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="h5">Total Amount:</span>
+                        <span class="h4 text-primary">$<span th:text="${#numbers.formatDecimal(cart.totalAmount, 1, 2)}">0.00</span></span>
+                    </div>
+                    <form th:action="@{/order/checkout}" method="post">
+                        <a href="/checkout/payment" class="btn btn-success w-100 btn-lg">Proceed to Checkout</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

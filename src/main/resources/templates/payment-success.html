@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Successful - Husky Amazon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .success-card { max-width: 500px; margin: 80px auto; text-align: center; }
+        .icon-box {
+            width: 80px; height: 80px; margin: 0 auto 20px;
+            background-color: #d1e7dd; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .icon-box i { font-size: 40px; color: #198754; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container">
+    <div class="card shadow-sm border-0 success-card">
+        <div class="card-body p-5">
+            <div class="icon-box">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <h2 class="mb-3 fw-bold text-success">Payment Successful!</h2>
+            <p class="text-muted mb-4">
+                Thank you for your purchase. Your order has been placed successfully.
+            </p>
+
+            <div class="alert alert-light border mb-4">
+                <small class="text-muted text-uppercase fw-bold">Order ID</small>
+                <div class="fs-4 fw-bold">#<span th:text="${orderId}">101</span></div>
+            </div>
+
+            <p class="small text-muted mb-4">
+                <i class="fas fa-envelope me-1"></i>
+                A confirmation email has been sent to your registered email address.
+            </p>
+
+            <div class="d-grid gap-2">
+                <a href="/order/history" class="btn btn-primary">View My Orders</a>
+                <a href="/" class="btn btn-outline-secondary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Husky Amazon - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 商品卡片悬停效果 */
+        .product-card { transition: transform 0.2s; height: 100%; border: 1px solid #f0f0f0; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .product-img { height: 200px; object-fit: contain; padding: 20px; }
+
+        /* 导航栏搜索框 */
+        .search-form { width: 50%; }
+        @media (max-width: 991px) { .search-form { width: 100%; margin: 10px 0; } }
+
+        /* 侧边栏样式 */
+        .sidebar-title { font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.75rem; }
+        .filter-group { border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+        .rating-link .fa-star { color: #ccc; }
+        .rating-link .fa-star.checked { color: #ffc107; }
+        .filter-group .form-check { margin-bottom: 0.5rem; }
+        .filter-group .form-check-label { cursor: pointer; }
+        .filter-group .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
+
+        /* 轮播图样式 */
+        .carousel-item img {
+            height: 360px;
+            object-fit: cover;
+            filter: brightness(0.9); /* 轻微压暗，突出文字 */
+        }
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px 30px;
+            border-radius: 8px;
+            bottom: 20%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- 1. 顶部导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-nowrap" href="/">🐶 Husky Amazon</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- 搜索框：提交到 /filter，并与筛选表单保持一致 -->
+            <form class="d-flex mx-auto search-form" action="/filter" method="get">
+                <input class="form-control" type="search" name="keyword"
+                       placeholder="Search products..." th:value="${searchKeyword}">
+                <button class="btn btn-warning" type="submit"><i class="fas fa-search"></i></button>
+            </form>
+
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link active text-nowrap" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap position-relative" href="/cart">
+                    Cart <i class="fas fa-shopping-cart"></i>
+                </a></li>
+
+                <!-- 未登录 -->
+                <th:block th:if="${session.currentUser == null}">
+                    <li class="nav-item ms-2"><a class="nav-link text-nowrap btn btn-outline-light btn-sm px-3" href="/login">Login</a></li>
+                </th:block>
+
+                <!-- 已登录 -->
+                <th:block th:if="${session.currentUser != null}">
+                    <li class="nav-item ms-3"><a class="nav-link text-nowrap" href="/order/history">Orders</a></li>
+                    <li class="nav-item ms-3 me-3">
+                        <a class="nav-link text-nowrap" href="/profile">
+                            Hi, <span class="fw-bold text-warning" th:text="${session.currentUser.username}">User</span>
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link btn btn-danger btn-sm text-white px-3" href="/logout">Logout</a></li>
+                </th:block>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 2. 主容器 -->
+<div class="container">
+
+    <!-- ⭐ 轮播图广告栏 (Carousel) ⭐ -->
+    <div id="promoCarousel" class="carousel slide mb-5 shadow rounded overflow-hidden" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active" data-bs-interval="5000">
+                <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2000&auto=format&fit=crop" class="d-block w-100" alt="Holiday Sale">
+                <div class="carousel-caption d-none d-md-block text-start">
+                    <h1 class="display-4 fw-bold">Holiday Super Sale</h1>
+                    <p class="fs-4">Up to 50% off on selected items. Find the perfect gift.</p>
+                    <a href="/filter?minDiscount=0.1" class="btn btn-warning btn-lg fw-bold px-4 shadow">Shop Deals</a>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-item" data-bs-interval="5000">
+                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2000&auto=format&fit=crop" class="d-block w-100" alt="Tech">
+                <div class="carousel-caption d-none d-md-block">
+                    <h1 class="display-4 fw-bold">Next Gen Tech</h1>
+                    <p class="fs-4">Upgrade your setup with the latest gadgets.</p>
+                    <a href="/filter?categoryId=1" class="btn btn-primary btn-lg fw-bold px-4 shadow">Shop Electronics</a>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-item" data-bs-interval="5000">
+                <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=2000&auto=format&fit=crop" class="d-block w-100" alt="Home">
+                <div class="carousel-caption d-none d-md-block text-end">
+                    <h1 class="display-4 fw-bold">Cozy Home</h1>
+                    <p class="fs-4">Essentials for a comfortable living.</p>
+                    <a href="/filter?categoryId=4" class="btn btn-light btn-lg fw-bold px-4 shadow">Shop Home & Kitchen</a>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- 3. 左侧：筛选侧边栏 -->
+        <div class="col-md-3">
+            <div class="card shadow-sm sticky-top border-0" style="top: 80px;">
+                <div class="card-body bg-white rounded">
+                    <!-- 筛选表单 -->
+                    <form id="filterForm" action="/filter" method="get">
+                        <!-- 隐藏字段：用于保持分页和搜索状态 -->
+                        <input type="hidden" name="page" value="1" id="pageInput">
+                        <input type="hidden" name="keyword" th:value="${searchKeyword}">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title fw-bold mb-0"><i class="fas fa-filter me-2 text-primary"></i>Filters</h5>
+                            <a href="/" class="btn btn-sm btn-outline-secondary">Reset</a>
+                        </div>
+
+                        <!-- 类别筛选 -->
+                        <div class="filter-group">
+                            <h6 class="sidebar-title">Categories</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="categoryId" id="catAll" value="" th:checked="${!filters.containsKey('categoryId')}">
+                                <label class="form-check-label" for="catAll">All Products</label>
+                            </div>
+                            <div th:each="category : ${categories}" class="form-check">
+                                <input class="form-check-input" type="radio" name="categoryId"
+                                       th:id="'cat-' + ${category.id}"
+                                       th:value="${category.id}"
+                                       th:checked="${filters.get('categoryId') != null && filters.get('categoryId') == category.id}">
+                                <label class="form-check-label" th:for="'cat-' + ${category.id}" th:text="${category.name}">Category</label>
+                            </div>
+                        </div>
+
+                        <!-- 价格筛选 (滑动条) -->
+                        <div class="filter-group">
+                            <h6 class="sidebar-title">Max Price</h6>
+                            <label for="maxPrice" class="form-label d-flex justify-content-between">
+                                <span>$0</span>
+                                <strong id="priceValue" class="text-primary">$2000</strong>
+                            </label>
+                            <input type="range" class="form-range" id="maxPrice" name="maxPrice" min="10" max="2000" step="10"
+                                   th:value="${filters.get('maxPrice') != null ? filters.get('maxPrice') : 2000}"
+                                   oninput="updatePriceValue(this.value)">
+                        </div>
+
+                        <!-- 折扣筛选 -->
+                        <div class="filter-group">
+                            <h6 class="sidebar-title">Discount</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="minDiscount" id="discAll" value="" th:checked="${!filters.containsKey('minDiscount')}">
+                                <label class="form-check-label" for="discAll">Any</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="minDiscount" id="disc10" value="0.1" th:checked="${filters.get('minDiscount') != null && filters.get('minDiscount') == 0.1}">
+                                <label class="form-check-label" for="disc10">10% Off & Up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="minDiscount" id="disc25" value="0.25" th:checked="${filters.get('minDiscount') != null && filters.get('minDiscount') == 0.25}">
+                                <label class="form-check-label" for="disc25">25% Off & Up</label>
+                            </div>
+                        </div>
+
+                        <!-- 评分筛选 -->
+                        <div class="filter-group">
+                            <h6 class="sidebar-title">Avg. Customer Review</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="minRating" id="ratingAll" value="" th:checked="${!filters.containsKey('minRating')}">
+                                <label class="form-check-label" for="ratingAll">Any</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="minRating" id="rating4" value="4" th:checked="${filters.get('minRating') != null && filters.get('minRating') == 4.0}">
+                                <label class="form-check-label rating-link" for="rating4">
+                                    <span class="star-rating"><i class="fa-solid fa-star checked"></i><i class="fa-solid fa-star checked"></i><i class="fa-solid fa-star checked"></i><i class="fa-solid fa-star checked"></i><i class="fa-regular fa-star"></i></span> & Up
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="minRating" id="rating3" value="3" th:checked="${filters.get('minRating') != null && filters.get('minRating') == 3.0}">
+                                <label class="form-check-label rating-link" for="rating3">
+                                    <span class="star-rating"><i class="fa-solid fa-star checked"></i><i class="fa-solid fa-star checked"></i><i class="fa-solid fa-star checked"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></span> & Up
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 排序 -->
+                        <div class="mt-3 pt-3 border-top">
+                            <label class="form-label fw-bold">Sort By</label>
+                            <select class="form-select" name="sortBy">
+                                <option value="newest" th:selected="${sortBy == 'newest'}">Newest Arrivals</option>
+                                <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Price: Low to High</option>
+                                <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Price: High to Low</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3 fw-bold">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 右侧：商品列表 -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border">
+                <div>
+                    <h4 class="mb-0 fw-bold" th:text="${pageTitle}">Products</h4>
+                    <small class="text-muted" th:if="${searchKeyword}">Results for "<span th:text="${searchKeyword}"></span>"</small>
+                </div>
+                <span class="badge bg-secondary">
+                    Showing <span th:text="${products.size()}">0</span> of <span th:text="${totalItems}">0</span> results
+                </span>
+            </div>
+
+            <!-- 空状态提示 -->
+            <div th:if="${products.isEmpty()}" class="alert alert-info text-center py-5 shadow-sm">
+                <div class="mb-3"><i class="fas fa-search fa-3x text-info"></i></div>
+                <h4>No products match your criteria</h4>
+                <p>Try clearing filters or checking your spelling.</p>
+                <a href="/" class="btn btn-outline-primary mt-2">Clear All Filters</a>
+            </div>
+
+            <!-- 商品网格 -->
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col" th:each="product : ${products}">
+                    <div class="card product-card h-100 border-0 shadow-sm">
+                        <!-- 图片 -->
+                        <a th:href="@{/product/{id}(id=${product.id})}" class="text-center bg-white rounded-top">
+                            <img th:src="${product.imageUrl}" class="card-img-top product-img" alt="Product Image">
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <!-- 标题 -->
+                            <a th:href="@{/product/{id}(id=${product.id})}" class="text-decoration-none text-dark">
+                                <h5 class="card-title text-truncate" th:text="${product.name}" th:title="${product.name}">Product Name</h5>
+                            </a>
+                            <!-- 描述 -->
+                            <p class="card-text text-muted small text-truncate" th:text="${product.description}">Description</p>
+
+                            <!-- 价格与折扣 -->
+                            <div class="mb-2">
+                                <div th:if="${product.originalPrice != null and product.originalPrice > product.price}">
+                                    <span class="fs-5 fw-bold text-danger" th:text="'$' + ${product.price}">$99</span>
+                                    <small class="text-decoration-line-through text-muted ms-1" th:text="'$' + ${product.originalPrice}">$120</small>
+                                    <span class="badge bg-danger ms-1" th:text="${#numbers.formatDecimal(100 * (1 - product.price / product.originalPrice), 0, 0)} + '% Off'">20% Off</span>
+                                </div>
+                                <div th:unless="${product.originalPrice != null and product.originalPrice > product.price}">
+                                    <span class="fs-5 fw-bold text-dark" th:text="'$' + ${product.price}">$99</span>
+                                </div>
+                            </div>
+
+                            <!-- 按钮 -->
+                            <div class="mt-auto d-grid">
+                                <a th:href="${session.currentUser != null ? '/cart/add/' + product.id : '/login'}"
+                                   class="btn btn-warning fw-bold">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页条 -->
+            <nav aria-label="Page navigation" class="mt-5" th:if="${totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous -->
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <button class="page-link" th:onclick="'changePage(' + (${currentPage} - 1) + ')'">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                    </li>
+
+                    <!-- 页码循环 -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <button class="page-link" th:text="${i}" th:onclick="'changePage(' + ${i} + ')'">1</button>
+                    </li>
+
+                    <!-- Next -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                        <button class="page-link" th:onclick="'changePage(' + (${currentPage} + 1) + ')'">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+
+    <!-- ⭐⭐ 5. 浏览记录区域 (View History) ⭐⭐ -->
+    <div class="mt-5 pt-4 border-top" th:if="${historyProducts != null and !historyProducts.isEmpty()}">
+        <h4 class="mb-3 fw-bold"><i class="fas fa-history me-2 text-secondary"></i>Your Recently Viewed Items</h4>
+
+        <div class="row row-cols-2 row-cols-md-6 g-3">
+            <div class="col" th:each="prod : ${historyProducts}">
+                <div class="card h-100 shadow-sm border-0" style="font-size: 0.85rem;">
+                    <a th:href="@{/product/{id}(id=${prod.id})}">
+                        <img th:src="${prod.imageUrl}" class="card-img-top p-3"
+                             style="height: 120px; object-fit: contain;">
+                    </a>
+                    <div class="card-body p-2 text-center">
+                        <a th:href="@{/product/{id}(id=${prod.id})}" class="text-decoration-none text-dark d-block text-truncate fw-bold mb-1"
+                           th:text="${prod.name}" th:title="${prod.name}">Name</a>
+                        <div th:if="${prod.originalPrice != null and prod.originalPrice > prod.price}">
+                            <span class="text-danger fw-bold" th:text="'$' + ${prod.price}">$99</span>
+                        </div>
+                        <div th:unless="${prod.originalPrice != null and prod.originalPrice > prod.price}">
+                            <span class="text-dark fw-bold" th:text="'$' + ${prod.price}">$99</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- container end -->
+
+<!-- 6. Scripts -->
+<script>
+    // 更新价格显示
+    function updatePriceValue(value) {
+        document.getElementById('priceValue').textContent = '$' + value;
+    }
+
+    // 翻页逻辑：修改隐藏字段并提交表单
+    function changePage(page) {
+        document.getElementById('pageInput').value = page;
+        document.getElementById('filterForm').submit();
+    }
+
+    // 页面加载时初始化滑块显示
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const priceSlider = document.getElementById('maxPrice');
+        if(priceSlider) {
+            updatePriceValue(priceSlider.value);
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

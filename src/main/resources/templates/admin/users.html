@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-size: 0.9rem; }
+        .sidebar { height: 100vh; background-color: #343a40; color: white; position: fixed; width: 250px; }
+        .sidebar a { color: #adb5bd; text-decoration: none; display: block; padding: 10px 20px; }
+        .sidebar a:hover, .sidebar a.active { color: white; background-color: #495057; }
+        .main-content { margin-left: 250px; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar d-flex flex-column p-3">
+    <h4 class="mb-4 ps-2">Admin Panel</h4>
+    <a href="/admin/products"><i class="fas fa-box me-2"></i> Products</a>
+    <a href="/admin/orders"><i class="fas fa-shopping-cart me-2"></i> Orders</a>
+    <a href="/admin/users" class="active"><i class="fas fa-users me-2"></i> Users</a>
+    <hr>
+    <a href="/"><i class="fas fa-home me-2"></i> Back to Store</a>
+    <a href="/logout" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+</div>
+
+<div class="main-content">
+    <h2 class="mb-4">User Management</h2>
+
+    <!-- 成功提示 -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+        User updated successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td class="ps-4" th:text="${user.id}">1</td>
+                    <td class="fw-bold">
+                        <i class="fas fa-user-circle text-secondary me-1"></i>
+                        <span th:text="${user.username}">User</span>
+                    </td>
+                    <td th:text="${user.email}">user@example.com</td>
+                    <td>
+                        <span th:if="${user.role == 'ADMIN'}" class="badge bg-danger">ADMIN</span>
+                        <span th:if="${user.role == 'USER'}" class="badge bg-info text-dark">USER</span>
+                    </td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>
+                        <!-- ⭐ 修改点：激活编辑按钮 -->
+                        <a th:href="@{/admin/user/edit/{id}(id=${user.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
