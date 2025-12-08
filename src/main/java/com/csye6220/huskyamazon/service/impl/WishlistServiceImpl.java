@@ -52,4 +52,20 @@ public class WishlistServiceImpl implements WishlistService {
     public List<Wishlist> getWishlistForUser(User user) {
         return wishlistDAO.findByUser(user);
     }
+
+    /**
+     * ⭐ 检查商品是否在用户的心愿单中
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isProductInWishlist(User user, Product product) {
+        if (user == null || product == null) {
+            return false;
+        }
+
+        List<Wishlist> userWishlist = wishlistDAO.findByUser(user);
+
+        return userWishlist.stream()
+                .anyMatch(w -> w.getProduct().getId().equals(product.getId()));
+    }
 }

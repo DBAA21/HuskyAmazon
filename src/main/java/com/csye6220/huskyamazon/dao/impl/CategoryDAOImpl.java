@@ -36,4 +36,12 @@ public class CategoryDAOImpl implements CategoryDAO {
     public List<Category> findAll() {
         return getCurrentSession().createQuery("from Category", Category.class).list();
     }
+
+    @Override
+    public void delete(Long id) {
+        Category category = entityManager.find(Category.class, id);
+        if (category != null) {
+            entityManager.remove(category);
+        }
+    }
 }

@@ -7,4 +7,6 @@ public interface CategoryDAO {
     void save(Category category);
     Category findById(Long id);
     List<Category> findAll();
+
+    void delete(Long id);
 }

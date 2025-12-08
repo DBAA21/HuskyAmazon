@@ -15,11 +15,15 @@
 </head>
 <body>
 
+<!-- ⭐ 侧边栏 -->
 <div class="sidebar d-flex flex-column p-3">
     <h4 class="mb-4 ps-2">Admin Panel</h4>
     <a href="/admin/products"><i class="fas fa-box me-2"></i> Products</a>
     <a href="/admin/orders" class="active"><i class="fas fa-shopping-cart me-2"></i> Orders</a>
     <a href="/admin/users"><i class="fas fa-users me-2"></i> Users</a>
+    <a href="/admin/categories"><i class="fas fa-tags me-2"></i> Categories</a>
+    <!-- ⭐ 新增入口：Coupons -->
+    <a href="/admin/coupons"><i class="fas fa-ticket-alt me-2"></i> Coupons</a>
     <hr>
     <a href="/"><i class="fas fa-home me-2"></i> Back to Store</a>
     <a href="/logout" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
@@ -56,19 +60,18 @@
                     </td>
                     <td class="fw-bold text-success" th:text="'$' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">$100.00</td>
                     <td>
-                        <span th:if="${order.status == 'PLACED'}" class="badge bg-primary">Placed</span>
+                        <span th:if="${order.status.startsWith('PLACED')}" class="badge bg-primary" th:text="${order.status}">Placed</span>
                         <span th:if="${order.status == 'SHIPPED'}" class="badge bg-success">Shipped</span>
                     </td>
                     <td>
-                        <a th:if="${order.status == 'PLACED'}"
+                        <!-- 使用 contains 判断，兼容带 Coupon 的状态 -->
+                        <a th:if="${order.status.contains('PLACED')}"
                            th:href="@{/admin/order/ship/{id}(id=${order.id})}"
                            class="btn btn-sm btn-outline-primary"
-                           onclick="return confirm('Mark this order as Shipped?')">
-                            <i class="fas fa-truck"></i> Ship Order
+                           onclick="return confirm('Mark as Shipped?')">
+                            <i class="fas fa-truck"></i> Ship
                         </a>
-                        <span th:if="${order.status == 'SHIPPED'}" class="text-muted small">
-                                <i class="fas fa-check"></i> Completed
-                            </span>
+                        <span th:if="${order.status == 'SHIPPED'}" class="text-muted small"><i class="fas fa-check"></i> Done</span>
                     </td>
                 </tr>
                 </tbody>

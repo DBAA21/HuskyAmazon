@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Users</title>
+    <title>Admin - Categories</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -20,8 +20,8 @@
     <h4 class="mb-4 ps-2">Admin Panel</h4>
     <a href="/admin/products"><i class="fas fa-box me-2"></i> Products</a>
     <a href="/admin/orders"><i class="fas fa-shopping-cart me-2"></i> Orders</a>
-    <a href="/admin/users" class="active"><i class="fas fa-users me-2"></i> Users</a>
-    <a href="/admin/categories"><i class="fas fa-tags me-2"></i> Categories</a>
+    <a href="/admin/users"><i class="fas fa-users me-2"></i> Users</a>
+    <a href="/admin/categories" class="active"><i class="fas fa-tags me-2"></i> Categories</a>
     <!-- ⭐ 新增入口：Coupons -->
     <a href="/admin/coupons"><i class="fas fa-ticket-alt me-2"></i> Coupons</a>
     <hr>
@@ -30,44 +30,47 @@
 </div>
 
 <div class="main-content">
-    <h2 class="mb-4">User Management</h2>
+    <h2 class="mb-4">Category Management</h2>
 
     <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
-        User updated successfully!
+        Category added successfully!
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
+    <!-- 添加分类表单 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light fw-bold">Add New Category</div>
+        <div class="card-body">
+            <form th:action="@{/admin/category/add}" method="post" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="name" class="form-control" placeholder="Category Name (e.g. Beauty)" required>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" name="description" class="form-control" placeholder="Description" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus"></i> Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 分类列表 -->
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                 <tr>
                     <th class="ps-4">ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Name</th>
+                    <th>Description</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="user : ${users}">
-                    <td class="ps-4" th:text="${user.id}">1</td>
-                    <td class="fw-bold">
-                        <i class="fas fa-user-circle text-secondary me-1"></i>
-                        <span th:text="${user.username}">User</span>
-                    </td>
-                    <td th:text="${user.email}">user@example.com</td>
-                    <td>
-                        <span th:if="${user.role == 'ADMIN'}" class="badge bg-danger">ADMIN</span>
-                        <span th:if="${user.role == 'USER'}" class="badge bg-info text-dark">USER</span>
-                    </td>
-                    <td><span class="badge bg-success">Active</span></td>
-                    <td>
-                        <a th:href="@{/admin/user/edit/{id}(id=${user.id})}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                    </td>
+                <tr th:each="cat : ${categories}">
+                    <td class="ps-4" th:text="${cat.id}">1</td>
+                    <td><span class="badge bg-primary" th:text="${cat.name}">Electronics</span></td>
+                    <td th:text="${cat.description}">Desc...</td>
                 </tr>
                 </tbody>
             </table>

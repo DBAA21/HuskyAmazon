@@ -25,4 +25,7 @@ public interface ProductService {
     // --- ⭐ 新增的两个浏览记录方法 ---
     void recordViewHistory(User user, Long productId);
     List<Product> getViewHistory(User user);
+
+    // ⭐ 新增
+    List<Product> getRecommendedProducts(Long productId);
 }

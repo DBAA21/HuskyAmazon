@@ -1,20 +1,15 @@
 package com.csye6220.huskyamazon.controller;
 
 import com.csye6220.huskyamazon.entity.Cart;
+import com.csye6220.huskyamazon.entity.Coupon;
 import com.csye6220.huskyamazon.entity.Order;
 import com.csye6220.huskyamazon.entity.User;
-import com.csye6220.huskyamazon.service.CartService;
-import com.csye6220.huskyamazon.service.EmailService;
-import com.csye6220.huskyamazon.service.OrderService;
-import com.csye6220.huskyamazon.service.UserService;
+import com.csye6220.huskyamazon.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -26,68 +21,105 @@ public class CheckoutController {
     private final OrderService orderService;
     private final EmailService emailService;
     private final UserService userService;
+    private final CouponService couponService;
 
     @Autowired
-    public CheckoutController(CartService cartService, OrderService orderService, EmailService emailService, UserService userService) {
+    public CheckoutController(CartService cartService, OrderService orderService,
+                              EmailService emailService, UserService userService,
+                              CouponService couponService) {
         this.cartService = cartService;
         this.orderService = orderService;
         this.emailService = emailService;
         this.userService = userService;
+        this.couponService = couponService;
     }
 
-    // 1. 展示支付页面
     @GetMapping("/payment")
-    public String showPaymentPage(Model model, Principal principal) {
+    public String showPaymentPage(Model model, Principal principal, HttpSession session) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByUsername(principal.getName());
-
         Cart cart = cartService.getCartByUser(user);
-        if (cart.getItems().isEmpty()) {
-            return "redirect:/cart?empty";
+        if (cart.getItems().isEmpty()) return "redirect:/cart?empty";
+
+        // 前端展示逻辑：只负责算给用户看，不影响数据库
+        Coupon appliedCoupon = (Coupon) session.getAttribute("appliedCoupon");
+        double finalTotal = cart.getTotalAmount();
+        double discountAmount = 0.0;
+
+        if (appliedCoupon != null) {
+            try {
+                // 验证
+                couponService.getValidCoupon(appliedCoupon.getCode(), cart.getTotalAmount());
+                // 计算展示用的金额
+                discountAmount = cart.getTotalAmount() * appliedCoupon.getDiscountPercent();
+                finalTotal = cart.getTotalAmount() - discountAmount;
+            } catch (Exception e) {
+                session.removeAttribute("appliedCoupon");
+                model.addAttribute("couponError", "Coupon removed: " + e.getMessage());
+            }
         }
 
         model.addAttribute("cart", cart);
+        model.addAttribute("discountAmount", discountAmount);
+        model.addAttribute("finalTotal", finalTotal);
+        model.addAttribute("appliedCoupon", appliedCoupon);
+
         return "payment";
     }
 
-    // 2. 处理支付
-    @PostMapping("/process")
-    public String processPayment(@RequestParam String cardNumber,
-                                 @RequestParam String expiryDate,
-                                 @RequestParam String cvv,
-                                 Model model, Principal principal) {
+    @PostMapping("/coupon/apply")
+    public String applyCoupon(@RequestParam String code, Principal principal, HttpSession session) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByUsername(principal.getName());
-
-        // 模拟支付验证
-        if (!cardNumber.matches("\\d{16}")) {
-            model.addAttribute("error", "Invalid Card Number (Must be 16 digits)");
-            model.addAttribute("cart", cartService.getCartByUser(user));
-            return "payment";
-        }
+        Cart cart = cartService.getCartByUser(user); // 获取当前购物车总价用于验证
 
         try {
-
-            // 下单
-            Order order = orderService.placeOrder(user);
-
-            // 发送邮件 (异步)
-            emailService.sendOrderConfirmation(user, order);
-
-            // ⭐ 修改点：跳转到专门的成功页面，并带上订单ID
-            return "redirect:/checkout/success?orderId=" + order.getId();
-
+            Coupon coupon = couponService.getValidCoupon(code, cart.getTotalAmount());
+            session.setAttribute("appliedCoupon", coupon);
+            return "redirect:/checkout/payment?couponSuccess";
         } catch (Exception e) {
-            model.addAttribute("error", "Transaction Failed: " + e.getMessage());
-            model.addAttribute("cart", cartService.getCartByUser(user));
-            return "payment";
+            return "redirect:/checkout/payment?couponError=" + e.getMessage();
         }
     }
 
-    // --- ⭐ 新增：支付成功页面 ---
+    @GetMapping("/coupon/remove")
+    public String removeCoupon(HttpSession session) {
+        session.removeAttribute("appliedCoupon");
+        return "redirect:/checkout/payment";
+    }
+
+    @PostMapping("/process")
+    public String processPayment(@RequestParam String cardNumber,
+                                 Model model, Principal principal, HttpSession session) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByUsername(principal.getName());
+
+        if (!cardNumber.matches("\\d{16}")) return "redirect:/checkout/payment?error=InvalidCard";
+
+        try {
+            // 模拟支付延迟
+            Thread.sleep(1000);
+
+            // ⭐ 获取优惠券
+            Coupon coupon = (Coupon) session.getAttribute("appliedCoupon");
+
+            // ⭐ 核心修改：直接将优惠券传给 Service，由 Service 负责计算最终金额和扣库存
+            Order order = orderService.placeOrder(user, coupon);
+
+            // 支付成功后清理 Session
+            session.removeAttribute("appliedCoupon");
+
+            emailService.sendOrderConfirmation(user, order);
+            return "redirect:/checkout/success?orderId=" + order.getId();
+
+        } catch (Exception e) {
+            return "redirect:/checkout/payment?error=" + e.getMessage();
+        }
+    }
+
     @GetMapping("/success")
     public String showSuccessPage(@RequestParam Long orderId, Model model) {
         model.addAttribute("orderId", orderId);
-        return "payment-success"; // 对应 payment-success.html
+        return "payment-success";
     }
 }

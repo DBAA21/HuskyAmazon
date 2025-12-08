@@ -36,22 +36,21 @@ public class ProductController {
     public String showProductDetail(@PathVariable Long id, Model model, Principal principal) {
         Product product = productService.getProductById(id);
 
-        // 加载评论
-        List<Review> reviews = reviewService.getReviewsForProduct(id);
+        List<Review> reviews = reviewService.getReviewsByProduct(id);
         model.addAttribute("product", product);
         model.addAttribute("reviews", reviews);
 
-        // 加载收藏状态 & 记录浏览历史
+        // 加载收藏状态 & 记录历史
         if (principal != null) {
             User user = userService.findByUsername(principal.getName());
-
-            // 1. 检查是否在收藏夹
-            boolean isFavorite = wishlistService.isFavorite(user, id);
+            boolean isFavorite = wishlistService.isProductInWishlist(user, product);
             model.addAttribute("isFavorite", isFavorite);
-
-            // ⭐ 2. 核心修改：记录浏览历史
             productService.recordViewHistory(user, id);
         }
+
+        // ⭐⭐ 核心修改：获取推荐商品 (Bought Together) ⭐⭐
+        List<Product> recommendedProducts = productService.getRecommendedProducts(id);
+        model.addAttribute("recommendedProducts", recommendedProducts);
 
         return "product-detail";
     }

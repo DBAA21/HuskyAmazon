@@ -3,63 +3,64 @@ package com.csye6220.huskyamazon.controller;
 import com.csye6220.huskyamazon.entity.Cart;
 import com.csye6220.huskyamazon.entity.User;
 import com.csye6220.huskyamazon.service.CartService;
-import jakarta.servlet.http.HttpSession;
+import com.csye6220.huskyamazon.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/cart")
 public class CartController {
 
     private final CartService cartService;
+    private final UserService userService;
 
     @Autowired
-    public CartController(CartService cartService) {
+    public CartController(CartService cartService, UserService userService) {
         this.cartService = cartService;
+        this.userService = userService;
     }
 
-    // 显示购物车页面
     @GetMapping
-    public String viewCart(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
-            return "redirect:/login";
-        }
+    public String viewCart(Model model, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByUsername(principal.getName());
 
-        // 使用 Service 获取（包含初始化 items 的逻辑）
         Cart cart = cartService.getCartByUser(user);
         model.addAttribute("cart", cart);
-
         return "cart";
     }
 
-    // 添加商品
     @GetMapping("/add/{productId}")
-    public String addToCart(@PathVariable Long productId, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
-            return "redirect:/login";
-        }
+    public String addToCart(@PathVariable Long productId, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByUsername(principal.getName());
 
-        // 默认每次添加 1 个
-        cartService.addToCart(user, productId, 1);
-
+        cartService.addItemToCart(user, productId, 1);
         return "redirect:/cart";
     }
 
-    // 移除商品
-    @GetMapping("/remove/{cartItemId}")
-    public String removeFromCart(@PathVariable Long cartItemId, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
-            return "redirect:/login";
-        }
+    @GetMapping("/remove/{productId}")
+    public String removeFromCart(@PathVariable Long productId, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByUsername(principal.getName());
 
-        cartService.removeFromCart(user, cartItemId);
+        cartService.removeItemFromCart(user, productId);
+        return "redirect:/cart";
+    }
+
+    // --- ⭐ 新增：处理更新数量请求 ---
+    @PostMapping("/update")
+    public String updateQuantity(@RequestParam Long productId,
+                                 @RequestParam int quantity,
+                                 Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByUsername(principal.getName());
+
+        cartService.updateItemQuantity(user, productId, quantity);
 
         return "redirect:/cart";
     }

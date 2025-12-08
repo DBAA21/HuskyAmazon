@@ -141,4 +141,12 @@ public class ProductServiceImpl implements ProductService {
         result.put("totalItems", totalItems);
         return result;
     }
+
+    // ⭐ 实现
+    @Override
+    @Transactional(readOnly = true)
+    public List<Product> getRecommendedProducts(Long productId) {
+        // 获取前 4 个推荐商品
+        return productDAO.findFrequentlyBoughtTogether(productId, 4);
+    }
 }

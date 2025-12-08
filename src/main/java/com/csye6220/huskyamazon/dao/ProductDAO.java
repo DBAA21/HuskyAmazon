@@ -18,4 +18,7 @@ public interface ProductDAO {
 
     // ⭐ 新增：计算总条数 (用于前端计算页码)
     long countWithFilters(Map<String, Object> filters);
+
+    // --- ⭐ 新增：查找经常一起购买的商品 ---
+    List<Product> findFrequentlyBoughtTogether(Long productId, int limit);
 }

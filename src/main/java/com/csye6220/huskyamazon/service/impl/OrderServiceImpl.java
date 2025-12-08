@@ -1,6 +1,7 @@
 package com.csye6220.huskyamazon.service.impl;
 
 import com.csye6220.huskyamazon.dao.OrderDAO;
+import com.csye6220.huskyamazon.dao.ProductDAO;
 import com.csye6220.huskyamazon.entity.*;
 import com.csye6220.huskyamazon.service.CartService;
 import com.csye6220.huskyamazon.service.OrderService;
@@ -17,53 +18,79 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderDAO orderDAO;
     private final CartService cartService;
+    private final ProductDAO productDAO;
 
     @Autowired
-    public OrderServiceImpl(OrderDAO orderDAO, CartService cartService) {
+    public OrderServiceImpl(OrderDAO orderDAO, CartService cartService, ProductDAO productDAO) {
         this.orderDAO = orderDAO;
         this.cartService = cartService;
+        this.productDAO = productDAO;
     }
 
+    // ⭐ 完美实现：在 Service 层处理折扣逻辑
     @Override
     @Transactional
-    public Order placeOrder(User user) {
-        // 1. 获取用户当前的购物车
+    public Order placeOrder(User user, Coupon coupon) {
         Cart cart = cartService.getCartByUser(user);
 
         if (cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        // 2. 创建新订单对象
+        // 1. 计算原始总价
+        double originalTotal = cart.getTotalAmount();
+        double finalTotal = originalTotal;
+        String statusMessage = "PLACED";
+
+        // 2. 应用优惠券逻辑 (Double Check)
+        if (coupon != null) {
+            // 再次验证有效性 (防止 Session 里存的是过期的)
+            if (!coupon.isValid()) {
+                throw new RuntimeException("Coupon expired.");
+            }
+            if (coupon.getMinSpend() != null && originalTotal < coupon.getMinSpend()) {
+                throw new RuntimeException("Did not meet minimum spend for coupon.");
+            }
+
+            // 计算折扣
+            double discountAmount = originalTotal * coupon.getDiscountPercent();
+            finalTotal = originalTotal - discountAmount;
+
+            // 记录一下用了什么券 (追加在状态里，或者以后 Order 表加个 coupon_id 字段)
+            statusMessage = "PLACED (Coupon: " + coupon.getCode() + ")";
+        }
+
+        // 3. 创建订单
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus("PLACED");
-        order.setTotalAmount(cart.getTotalAmount());
-        order.setOrderItems(new ArrayList<>()); // 初始化列表
+        order.setStatus(statusMessage);
+        order.setTotalAmount(finalTotal); // ⭐ 存入的是打折后的价格
+        order.setOrderItems(new ArrayList<>());
 
-        // 3. 核心转换：CartItem -> OrderItem
+        // 4. 扣减库存并保存明细
         for (CartItem cartItem : cart.getItems()) {
+            Product product = cartItem.getProduct();
+            int qty = cartItem.getQuantity();
+
+            if (product.getStock() < qty) {
+                throw new RuntimeException("Product " + product.getName() + " is out of stock.");
+            }
+
+            // 扣库存
+            product.setStock(product.getStock() - qty);
+            productDAO.update(product);
+
             OrderItem orderItem = new OrderItem();
-
-            // 复制商品信息
-            orderItem.setProduct(cartItem.getProduct());
-            orderItem.setQuantity(cartItem.getQuantity());
-
-            // ⚠️关键：锁定当前价格 (Snapshot Price)
-            // 防止以后商品涨价影响历史订单金额
-            orderItem.setPriceAtPurchase(cartItem.getProduct().getPrice());
-
-            // 建立双向关联
+            orderItem.setProduct(product);
+            orderItem.setQuantity(qty);
+            orderItem.setPriceAtPurchase(product.getPrice());
             orderItem.setOrder(order);
             order.getOrderItems().add(orderItem);
         }
 
-        // 4. 保存订单
-        // 因为 Order 设了 CascadeType.ALL，所以 OrderItems 会被自动保存
+        // 5. 保存并清空购物车
         orderDAO.save(order);
-
-        // 5. 清空购物车
         cartService.clearCart(user);
 
         return order;
@@ -71,21 +98,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Order> getOrderHistory(User user) {
-        return orderDAO.findByUser(user);
-    }
+    public List<Order> getOrderHistory(User user) { return orderDAO.findByUser(user); }
 
     @Override
     @Transactional(readOnly = true)
-    public Order getOrderDetails(Long orderId) {
-        return orderDAO.findById(orderId);
-    }
+    public Order getOrderDetails(Long orderId) { return orderDAO.findById(orderId); }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Order> getAllOrders() {
-        return orderDAO.findAll();
-    }
+    public List<Order> getAllOrders() { return orderDAO.findAll(); }
 
     @Override
     @Transactional

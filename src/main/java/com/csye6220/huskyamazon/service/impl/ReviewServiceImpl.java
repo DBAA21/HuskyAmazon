@@ -48,4 +48,9 @@ public class ReviewServiceImpl implements ReviewService {
 
         reviewDAO.save(review);
     }
+
+    @Override
+    public List<Review> getReviewsByProduct(Long id) {
+        return reviewDAO.findByProductId(id);
+    }
 }
