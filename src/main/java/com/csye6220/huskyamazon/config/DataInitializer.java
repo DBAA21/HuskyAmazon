@@ -48,9 +48,5 @@ public class DataInitializer implements CommandLineRunner {
             userService.registerUser(adminUser);
             System.out.println("✅ 管理员用户创建成功: admin (密码: AdminPass123)");
         }
-
-        // 2. 初始化商品 (保持你之前的代码不变) ...
-        // ... (请保留之前创建 electronics, books, iPhone, Spring Book 的代码) ...
-        // 为了篇幅，我不重复打印那部分代码，请确保它们还在！
     }
 }
