@@ -24,27 +24,27 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT") // 允许存储长文本
+    @Column(columnDefinition = "TEXT") // Allow storing long text
     private String description;
 
     @Column(nullable = false)
     private Double price;
 
     @Column(name = "original_price")
-    private Double originalPrice; // 注意是 Double (nullable)
+    private Double originalPrice; // Note: Double (nullable)
 
     @Column(nullable = false)
-    private Integer stock; // 库存
+    private Integer stock; // Stock quantity
 
-    private String imageUrl; // 存储图片链接
+    private String imageUrl; // Store image link
 
-    // 多个商品属于一个分类
+    // Multiple products belong to one category
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
     private Category category;
 
-    // 一个商品下的所有评论
+    // All reviews under one product
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Review> reviews = new ArrayList<>();

@@ -9,10 +9,10 @@ public interface CouponService {
     void deleteCoupon(Long id);
 
     /**
-     * 验证并获取优惠券
-     * @param code 优惠码
-     * @param orderTotal 订单总金额 (用于检查最低消费)
-     * @return 有效的 Coupon 对象，如果无效抛出异常
+     * Validate and get coupon
+     * @param code Coupon code
+     * @param orderTotal Order total amount (used to check minimum spend)
+     * @return Valid Coupon object, throws exception if invalid
      */
     Coupon getValidCoupon(String code, double orderTotal);
 }

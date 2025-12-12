@@ -33,8 +33,8 @@ public class Category {
 
     private String description;
 
-    // 分类下的所有商品
-    // mappedBy 指向 Product 类中的 "category" 字段
+    // All products under this category
+    // mappedBy points to the "category" field in Product class
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Product> products;

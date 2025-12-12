@@ -11,10 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 用户服务实现类
+ * User service implementation class
  * <p>
- * 负责处理用户相关的核心业务逻辑，包括用户注册、登录验证、
- * 自动登录（记住我功能）、密码修改等功能
+ * Responsible for handling core business logic related to users, including user registration,
+ * login validation, auto-login (remember me feature), password modification, etc.
  * </p>
  *
  * @author HuskyAmazon Team
@@ -31,46 +31,46 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 用户注册
+     * User registration
      * <p>
-     * 核心业务逻辑：
-     * 1. 为新用户自动创建一个空购物车
-     * 2. 建立用户与购物车的双向关联
-     * 3. 利用JPA级联保存特性，一次保存用户和购物车
+     * Core business logic:
+     * 1. Automatically create an empty shopping cart for new users
+     * 2. Establish bidirectional association between user and cart
+     * 3. Use JPA cascade save feature to save user and cart in one operation
      * </p>
      *
-     * @param user 待注册的用户对象（包含用户名、密码、邮箱等信息）
-     * @throws org.springframework.dao.DataIntegrityViolationException 如果用户名已存在
+     * @param user User object to be registered (containing username, password, email, etc.)
+     * @throws org.springframework.dao.DataIntegrityViolationException If username already exists
      */
     @Override
-    @Transactional // 事务保证：用户和购物车要么同时保存成功，要么同时失败回滚
+    @Transactional // Transaction guarantee: user and cart are either both saved successfully or both rolled back
     public void registerUser(User user) {
-        // 业务逻辑：每个新用户自动分配一个空购物车
+        // Business logic: Each new user is automatically assigned an empty shopping cart
         Cart cart = new Cart();
-        cart.setUser(user); // 购物车关联用户
-        user.setCart(cart); // 用户关联购物车（双向关联）
+        cart.setUser(user); // Cart associated with user
+        user.setCart(cart); // User associated with cart (bidirectional association)
 
-        // 因为User实体配置了CascadeType.ALL，只需保存User，Cart会自动级联保存
+        // Because User entity is configured with CascadeType.ALL, only need to save User, Cart will be cascaded automatically
         userDAO.save(user);
     }
 
     /**
-     * 用户登录验证
+     * User login validation
      * <p>
-     * 验证用户名和密码是否匹配
+     * Validate if username and password match
      * </p>
      *
-     * @param username 用户名
-     * @param password 密码（明文）
-     * @return 验证成功返回用户对象，失败返回null
-     * @apiNote 生产环境应使用BCrypt等加密算法进行密码哈希比对，此处简化为明文比对
+     * @param username Username
+     * @param password Password (plain text)
+     * @return Returns user object if validation succeeds, null if fails
+     * @apiNote Production environment should use BCrypt or similar encryption algorithms for password hash comparison, simplified to plain text comparison here
      */
     @Override
     @Transactional(readOnly = true)
     public User login(String username, String password) {
         User user = userDAO.findByUsername(username);
         if (user != null && user.getPassword().equals(password)) {
-            // 注意：实际项目中密码应该使用BCrypt哈希比对，这里简化为明文比对
+            // Note: In actual projects, passwords should use BCrypt hash comparison, simplified to plain text comparison here
             return user;
         }
         return null;
@@ -83,19 +83,19 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 更新用户的自动登录令牌
+     * Update user's auto-login token
      * <p>
-     * 用于实现"记住我"功能，将生成的令牌保存到数据库，
-     * 同时该令牌也会存储在浏览器Cookie中用于自动登录验证
+     * Used to implement "remember me" feature, saves generated token to database,
+     * and the token is also stored in browser Cookie for auto-login validation
      * </p>
      *
-     * @param user  用户对象
-     * @param token 生成的唯一令牌（通常为UUID）
+     * @param user  User object
+     * @param token Generated unique token (usually UUID)
      */
     @Override
     @Transactional
     public void updateLoginToken(User user, String token) {
-        // 先查出持久化状态的User对象（确保在Hibernate Session管理范围内）
+        // First query the persisted User object (ensure within Hibernate Session management)
         User managedUser = userDAO.findById(user.getId());
         if (managedUser != null) {
             managedUser.setLoginToken(token);
@@ -104,13 +104,13 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 根据自动登录令牌查找用户
+     * Find user by auto-login token
      * <p>
-     * 用于"记住我"功能的自动登录，通过Cookie中的令牌验证用户身份
+     * Used for "remember me" feature's auto-login, validates user identity through token in Cookie
      * </p>
      *
-     * @param token 自动登录令牌
-     * @return 匹配的用户对象，未找到返回null
+     * @param token Auto-login token
+     * @return Matching user object, returns null if not found
      */
     @Override
     @Transactional(readOnly = true)
@@ -119,10 +119,10 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 根据用户ID查找用户
+     * Find user by user ID
      *
-     * @param id 用户ID
-     * @return 用户对象，未找到返回null
+     * @param id User ID
+     * @return User object, returns null if not found
      */
     @Override
     @Transactional(readOnly = true)
@@ -131,12 +131,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 获取所有用户列表
+     * Get all users list
      * <p>
-     * 主要用于管理员后台查看所有用户
+     * Mainly used for admin backend to view all users
      * </p>
      *
-     * @return 所有用户的列表
+     * @return List of all users
      */
     @Override
     @Transactional(readOnly = true)
@@ -145,61 +145,61 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 更新用户信息（管理员功能）
+     * Update user information (admin function)
      * <p>
-     * 核心业务逻辑：
-     * 1. 先从数据库查询最新的用户数据（避免覆盖其他字段）
-     * 2. 只更新允许修改的字段（邮箱、角色）
-     * 3. 敏感字段如密码、关联关系保持不变
+     * Core business logic:
+     * 1. First query latest user data from database (avoid overwriting other fields)
+     * 2. Only update allowed fields (email, role)
+     * 3. Sensitive fields like password, relationships remain unchanged
      * </p>
      *
-     * @param user 包含待更新信息的用户对象
+     * @param user User object containing information to be updated
      */
     @Override
     @Transactional
     public void updateUser(User user) {
-        // 关键逻辑：先查出数据库中的持久化对象，避免直接更新导致数据丢失
+        // Key logic: First query persisted object from database, avoid direct update causing data loss
         User existingUser = userDAO.findById(user.getId());
         if (existingUser != null) {
-            // 只更新允许修改的字段（白名单策略）
+            // Only update allowed fields (whitelist strategy)
             existingUser.setEmail(user.getEmail());
             existingUser.setRole(user.getRole());
 
-            // 注意：密码、购物车、订单等关联信息保持不变，防止误修改
+            // Note: Password, cart, orders and other relationship info remain unchanged, prevent accidental modification
 
             userDAO.update(existingUser);
         }
     }
 
     /**
-     * 修改用户密码
+     * Change user password
      * <p>
-     * 核心业务逻辑：
-     * 1. 从数据库获取最新的用户信息（防止使用过期数据）
-     * 2. 验证旧密码是否正确（安全校验）
-     * 3. 旧密码正确才允许更新为新密码
+     * Core business logic:
+     * 1. Get latest user info from database (prevent using stale data)
+     * 2. Validate if old password is correct (security check)
+     * 3. Only allow update to new password if old password is correct
      * </p>
      *
-     * @param user        当前用户对象
-     * @param oldPassword 旧密码（用于验证）
-     * @param newPassword 新密码
-     * @return true-修改成功，false-旧密码错误或用户不存在
+     * @param user        Current user object
+     * @param oldPassword Old password (for validation)
+     * @param newPassword New password
+     * @return true-modification successful, false-old password incorrect or user doesn't exist
      */
     @Override
     @Transactional
     public boolean changePassword(User user, String oldPassword, String newPassword) {
-        // 1. 获取数据库中最新的用户信息（确保数据一致性）
+        // 1. Get latest user info from database (ensure data consistency)
         User currentUser = userDAO.findById(user.getId());
 
         if (currentUser != null) {
-            // 2. 验证旧密码是否正确（安全校验，防止未授权修改）
+            // 2. Validate if old password is correct (security check, prevent unauthorized modification)
             if (currentUser.getPassword().equals(oldPassword)) {
-                // 3. 更新为新密码
+                // 3. Update to new password
                 currentUser.setPassword(newPassword);
                 userDAO.update(currentUser);
-                return true; // 修改成功
+                return true; // Modification successful
             }
         }
-        return false; // 旧密码错误或用户不存在
+        return false; // Old password incorrect or user doesn't exist
     }
 }

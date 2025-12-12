@@ -26,14 +26,14 @@ public class CartItem {
 
     private Integer quantity;
 
-    // 属于哪个购物车
+    // Belongs to which cart
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
     @ToString.Exclude
     private Cart cart;
 
-    // 关联哪个商品
-    @ManyToOne(fetch = FetchType.EAGER) // 购物车展示时通常都需要商品信息，Eager 比较方便
+    // Associated with which product
+    @ManyToOne(fetch = FetchType.EAGER) // Cart display usually needs product info, Eager is more convenient
     @JoinColumn(name = "product_id")
     private Product product;
 }

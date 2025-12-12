@@ -15,12 +15,18 @@
         Registration successful! Please login.
     </div>
 
-    <!-- 登录失败错误提示 -->
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <!-- ⭐⭐ 修复点：Spring Security 登录失败提示 ⭐⭐ -->
+    <!-- 只有当 URL 包含 error 参数时 (例如 /login?error)，才显示此错误 -->
+    <!-- 确保不要在 Controller 的 GET 方法中手动添加 error 参数 -->
+    <div th:if="${param.error != null}" class="alert alert-danger">
+        Invalid username or password.
+    </div>
+
+    <div th:if="${param.logout}" class="alert alert-info">
+        You have been logged out.
+    </div>
 
     <form th:action="@{/login}" method="post">
-        <!-- CSRF 令牌，避免 POST /login 被 403 -->
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input type="text" class="form-control" id="username" name="username" required>
@@ -31,10 +37,12 @@
             <input type="password" class="form-control" id="password" name="password" required>
         </div>
 
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="rememberMe" name="remember-me">
-            <label class="form-check-label" for="rememberMe">Remember me for 1 day</label>
+        <!-- Remember Me 选项 (配合 SecurityConfig) -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
+            <label class="form-check-label" for="remember-me">Remember me</label>
         </div>
+
         <button type="submit" class="btn btn-success w-100">Login</button>
     </form>
 

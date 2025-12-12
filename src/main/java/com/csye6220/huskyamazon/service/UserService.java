@@ -5,13 +5,13 @@ import com.csye6220.huskyamazon.entity.User;
 import java.util.List;
 
 public interface UserService {
-    // 注册：包含创建用户 + 分配购物车
+    // Register: includes creating user + assigning cart
     void registerUser(User user);
 
-    // 登录：验证用户名密码
+    // Login: validate username and password
     User login(String username, String password);
 
-    // 查找
+    // Find user
     User findByUsername(String username);
 
     void updateLoginToken(User user, String token);
@@ -22,7 +22,7 @@ public interface UserService {
 
     List<User> getAllUsers();
 
-    void updateUser(User user); // 用于管理员更新信息
+    void updateUser(User user); // For admin to update user information
 
     boolean changePassword(User user, String oldPassword, String newPassword);
 }

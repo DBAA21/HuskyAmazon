@@ -26,7 +26,7 @@ public class OrderItem {
 
     private Integer quantity;
 
-    // 购买时的单价 (防止商品后续涨价影响历史订单)
+    // Unit price at purchase (prevent subsequent price changes from affecting historical orders)
     private Double priceAtPurchase;
 
     @ManyToOne(fetch = FetchType.LAZY)

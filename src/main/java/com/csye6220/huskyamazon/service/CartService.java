@@ -5,18 +5,18 @@ import com.csye6220.huskyamazon.entity.User;
 
 public interface CartService {
 
-    // 获取用户的购物车 (如果没有则自动创建)
+    // Get user's cart (create automatically if it doesn't exist)
     Cart getCartByUser(User user);
 
-    // 添加商品到购物车 (如果已存在则增加数量)
+    // Add product to cart (increase quantity if already exists)
     void addItemToCart(User user, Long productId, int quantity);
 
-    // 从购物车移除商品
+    // Remove product from cart
     void removeItemFromCart(User user, Long productId);
 
-    // 更新购物车中某商品的数量 (如果数量<=0则删除)
+    // Update product quantity in cart (delete if quantity <= 0)
     void updateItemQuantity(User user, Long productId, int quantity);
 
-    // 清空购物车
+    // Clear cart
     void clearCart(User user);
 }

@@ -18,20 +18,20 @@ public class Coupon {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String code; // 优惠码 (例如: SAVE20)
+    private String code; // Coupon code (e.g., SAVE20)
 
     @Column(nullable = false)
-    private Double discountPercent; // 折扣力度 (例如: 0.20 代表打8折)
+    private Double discountPercent; // Discount rate (e.g., 0.20 represents 20% off)
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate expiryDate; // 过期时间
+    private LocalDate expiryDate; // Expiry date
 
-    private Double minSpend; // 最低消费门槛 (可选)
+    private Double minSpend; // Minimum spend threshold (optional)
 
-    private boolean isActive = true; // 开关
+    private boolean isActive = true; // Active toggle
 
-    // 判断是否有效
+    // Check if valid
     public boolean isValid() {
         return isActive && (expiryDate == null || !LocalDate.now().isAfter(expiryDate));
     }

@@ -7,7 +7,7 @@ public interface CategoryService {
     List<Category> getAllCategories();
     Category getCategoryById(Long id);
 
-    // --- ⭐ 新增：添加分类 ---
+    // --- ⭐ New: Add category ---
     void addCategory(Category category);
 
     void deleteCategory(Long id);

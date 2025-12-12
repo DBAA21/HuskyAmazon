@@ -27,7 +27,7 @@ public class ViewHistory {
     @Column(name = "viewed_at")
     private LocalDateTime viewedAt;
 
-    // 构造函数方便使用
+    // Constructor for convenience
     public ViewHistory(User user, Product product) {
         this.user = user;
         this.product = product;

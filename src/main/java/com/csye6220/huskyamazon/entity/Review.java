@@ -22,7 +22,7 @@ public class Review {
     @Column(nullable = false)
     @Min(value = 1, message = "Rating must be at least 1")
     @Max(value = 5, message = "Rating must be at most 5")
-    private int rating; // 1-5 星
+    private int rating; // 1-5 stars
 
     @Column(columnDefinition = "TEXT")
     @NotBlank(message = "Comment cannot be empty")
@@ -31,12 +31,12 @@ public class Review {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // 关系：一个评论 属于 一个用户
-    @ManyToOne(fetch = FetchType.EAGER) // 查评论时总想知道是谁写的
+    // Relationship: one review belongs to one user
+    @ManyToOne(fetch = FetchType.EAGER) // When querying reviews always want to know who wrote it
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 关系：一个评论 属于 一个商品
+    // Relationship: one review belongs to one product
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;

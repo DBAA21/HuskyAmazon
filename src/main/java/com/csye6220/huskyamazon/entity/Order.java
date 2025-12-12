@@ -40,18 +40,18 @@ public class Order {
     @Column(nullable = false)
     private Double totalAmount;
 
-    // 下单用户
+    // User who placed the order
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     private User user;
 
-    // 订单详情
+    // Order details
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<OrderItem> orderItems;
 
-    // 收货地址 (快照或引用，这里简单引用)
+    // Shipping address (snapshot or reference, simple reference here)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id")
     @ToString.Exclude

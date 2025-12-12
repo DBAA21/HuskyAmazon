@@ -31,7 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("currentUser");
 
-        // 1. 尝试从 Cookie 自动登录 (Remember Me 逻辑)
+        // 1. Try to auto-login from Cookie (Remember Me logic)
         if (currentUser == null) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
@@ -40,9 +40,9 @@ public class LoginInterceptor implements HandlerInterceptor {
                         User user = userService.findByLoginToken(cookie.getValue());
                         if (user != null) {
                             session.setAttribute("currentUser", user);
-                            currentUser = user; // 更新当前用户变量
+                            currentUser = user; // Update current user variable
 
-                            // 同步到 Spring Security，构造认证信息并放入上下文
+                            // Sync to Spring Security, construct authentication info and put into context
                             String role = "ROLE_" + (user.getRole() != null ? user.getRole() : "USER");
                             UsernamePasswordAuthenticationToken authentication =
                                     new UsernamePasswordAuthenticationToken(
@@ -61,24 +61,24 @@ public class LoginInterceptor implements HandlerInterceptor {
             }
         }
 
-        // --- ⭐ 新增：后台权限检查 ---
+        // --- ⭐ New: Admin permission check ---
         String requestURI = request.getRequestURI();
 
-        // 如果请求的是后台页面 (/admin/...)
+        // If requesting admin pages (/admin/...)
         if (requestURI.startsWith("/admin")) {
-            // 1. 没登录 -> 踢回登录页
+            // 1. Not logged in -> redirect to login page
             if (currentUser == null) {
                 response.sendRedirect("/login");
                 return false;
             }
-            // 2. 登录了但不是管理员 -> 踢回首页 (或者显示403页面)
+            // 2. Logged in but not admin -> redirect to home page (or show 403 page)
             if (!"ADMIN".equals(currentUser.getRole())) {
-                System.out.println("⚠️ 警告: 用户 " + currentUser.getUsername() + " 试图非法访问后台!");
-                response.sendRedirect("/"); // 踢回首页
+                System.out.println("⚠️ Warning: User " + currentUser.getUsername() + " attempted unauthorized admin access!");
+                response.sendRedirect("/"); // Redirect to home page
                 return false;
             }
         }
 
-        return true; // 放行其他请求
+        return true; // Allow other requests
     }
 }

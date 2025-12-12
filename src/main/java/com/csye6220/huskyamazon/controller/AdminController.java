@@ -39,7 +39,7 @@ public class AdminController {
     }
 
     // ==========================================
-    // 1. Dashboard & Products (商品管理)
+    // 1. Dashboard & Products (Product Management)
     // ==========================================
 
     @GetMapping
@@ -73,7 +73,7 @@ public class AdminController {
     }
 
     /**
-     * ⭐ 合并后的保存方法：支持带图片和不带图片的保存
+     * ⭐ Merged save method: supports saving with or without image
      */
     @PostMapping("/product/save")
     public String saveProduct(@Valid @ModelAttribute("product") Product product,
@@ -83,47 +83,47 @@ public class AdminController {
                               RedirectAttributes redirectAttributes,
                               Model model) {
 
-        // 1. 表单验证
+        // 1. Form validation
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
             return "admin/product-form";
         }
 
         try {
-            // 2. 处理分类
+            // 2. Handle category
             if (categoryId == null) {
                 redirectAttributes.addFlashAttribute("error", "Please select a category");
                 return "redirect:/admin/product/add";
             }
 
-            // 3. 处理图片上传（如果有新图片）
+            // 3. Handle image upload (if there's a new image)
             if (imageFile != null && !imageFile.isEmpty()) {
-                // 保存文件到硬盘
+                // Save file to disk
                 String fileName = fileStorageService.storeFile(imageFile);
 
-                // 生成访问 URL (例如: /uploads/uuid-abc.jpg)
+                // Generate access URL (e.g., /uploads/uuid-abc.jpg)
                 String imageUrl = "/uploads/" + fileName;
 
-                // 设置给 Product 对象
+                // Set to Product object
                 product.setImageUrl(imageUrl);
 
             } else {
-                // 如果用户没上传新图
+                // If user didn't upload new image
                 if (product.getId() != null) {
-                    // 更新操作：保留旧图
+                    // Update operation: keep old image
                     Product oldProduct = productService.getProductById(product.getId());
                     if (oldProduct != null && oldProduct.getImageUrl() != null) {
                         product.setImageUrl(oldProduct.getImageUrl());
                     }
                 } else {
-                    // 新增操作：如果没上传图，使用默认图
+                    // Add operation: if no image uploaded, use default image
                     if (product.getImageUrl() == null || product.getImageUrl().isEmpty()) {
                         product.setImageUrl("https://via.placeholder.com/300");
                     }
                 }
             }
 
-            // 4. 保存或更新商品
+            // 4. Save or update product
             if (product.getId() == null) {
                 productService.addProduct(product, categoryId);
                 redirectAttributes.addFlashAttribute("message", "Product added successfully!");
@@ -152,7 +152,7 @@ public class AdminController {
     }
 
     // ==========================================
-    // 2. Orders (订单管理)
+    // 2. Orders (Order Management)
     // ==========================================
 
     @GetMapping("/orders")
@@ -174,7 +174,7 @@ public class AdminController {
     }
 
     // ==========================================
-    // 3. Users (用户管理)
+    // 3. Users (User Management)
     // ==========================================
 
     @GetMapping("/users")
@@ -206,7 +206,7 @@ public class AdminController {
     }
 
     // ==========================================
-    // 4. Categories (分类管理)
+    // 4. Categories (Category Management)
     // ==========================================
 
     @GetMapping("/categories")
@@ -245,7 +245,7 @@ public class AdminController {
         return "redirect:/admin/categories";
     }
 
-    // --- ⭐ 新增：优惠券管理 ---
+    // --- ⭐ New: Coupon Management ---
 
     @GetMapping("/coupons")
     public String couponManagement(Model model) {
