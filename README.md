@@ -4,7 +4,7 @@
 
 A full-stack e-commerce platform built with Spring Boot, featuring a complete shopping lifecycle, recommendation engine, and admin dashboard.
 
-[View Demo](#screenshots) • [Key Features](#key-features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started)
+[View Demo](#-screenshots) • [Key Features](#-key-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started)
 
 </div>
 
