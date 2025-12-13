@@ -25,28 +25,28 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("=========== 开始初始化测试数据 ===========");
+        System.out.println("=========== Starting to initialize test data ===========");
 
-        // 1. 初始化普通测试用户
+        // 1. Initialize普通testuser
         if (userService.findByUsername("testuser") == null) {
             User testUser = new User();
             testUser.setUsername("testuser");
             testUser.setPassword("Password123");
             testUser.setEmail("student@northeastern.edu");
-            testUser.setRole("USER"); // 明确设置为普通用户
+            testUser.setRole("USER"); // Explicitly set as a regular user.
             userService.registerUser(testUser);
-            System.out.println("✅ 测试用户创建成功: testuser");
+            System.out.println("✅ Test user created successfully: testuser");
         }
 
-        // --- ⭐ 新增：初始化管理员用户 ---
+        // --- Initialize the administrator user. ---
         if (userService.findByUsername("admin") == null) {
             User adminUser = new User();
             adminUser.setUsername("admin");
-            adminUser.setPassword("AdminPass123"); // 强密码
+            adminUser.setPassword("AdminPass123");
             adminUser.setEmail("admin@northeastern.edu");
-            adminUser.setRole("ADMIN"); // ⭐ 关键：设置为管理员
+            adminUser.setRole("ADMIN");
             userService.registerUser(adminUser);
-            System.out.println("✅ 管理员用户创建成功: admin (密码: AdminPass123)");
+            System.out.println("✅ administratoruserCreatesuccessful: admin (password: AdminPass123)");
         }
     }
 }

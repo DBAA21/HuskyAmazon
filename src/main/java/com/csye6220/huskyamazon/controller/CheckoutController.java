@@ -41,16 +41,16 @@ public class CheckoutController {
         Cart cart = cartService.getCartByUser(user);
         if (cart.getItems().isEmpty()) return "redirect:/cart?empty";
 
-        // 前端展示逻辑：只负责算给用户看，不影响数据库
+        // frontend展示逻辑：只responsible for算给user看，不影响database
         Coupon appliedCoupon = (Coupon) session.getAttribute("appliedCoupon");
         double finalTotal = cart.getTotalAmount();
         double discountAmount = 0.0;
 
         if (appliedCoupon != null) {
             try {
-                // 验证
+                // Validate
                 couponService.getValidCoupon(appliedCoupon.getCode(), cart.getTotalAmount());
-                // 计算展示用的金额
+                // calculate展示用的amount
                 discountAmount = cart.getTotalAmount() * appliedCoupon.getDiscountPercent();
                 finalTotal = cart.getTotalAmount() - discountAmount;
             } catch (Exception e) {
@@ -71,7 +71,7 @@ public class CheckoutController {
     public String applyCoupon(@RequestParam String code, Principal principal, HttpSession session) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByUsername(principal.getName());
-        Cart cart = cartService.getCartByUser(user); // 获取当前购物车总价用于验证
+        Cart cart = cartService.getCartByUser(user); // Getcurrentcarttotal价used forValidate
 
         try {
             Coupon coupon = couponService.getValidCoupon(code, cart.getTotalAmount());
@@ -97,16 +97,16 @@ public class CheckoutController {
         if (!cardNumber.matches("\\d{16}")) return "redirect:/checkout/payment?error=InvalidCard";
 
         try {
-            // 模拟支付延迟
+            // mock支付latency
             Thread.sleep(1000);
 
-            // ⭐ 获取优惠券
+            // ⭐ Getcoupon
             Coupon coupon = (Coupon) session.getAttribute("appliedCoupon");
 
-            // ⭐ 核心修改：直接将优惠券传给 Service，由 Service 负责计算最终金额和扣库存
+            // ⭐ CoreModified：直接将coupon传给 Service，由 Service responsible forcalculatefinalamount和扣stock
             Order order = orderService.placeOrder(user, coupon);
 
-            // 支付成功后清理 Session
+            // 支付successful后清理 Session
             session.removeAttribute("appliedCoupon");
 
             emailService.sendOrderConfirmation(user, order);

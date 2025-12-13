@@ -14,7 +14,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 /**
- * 本地文件存储服务实现
+ * 本地filestoreserviceimplement
  */
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
@@ -22,8 +22,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     private final Path fileStorageLocation;
 
     /**
-     * 构造函数：初始化文件存储路径
-     * @param uploadDir 从 application.properties 读取的上传目录
+     * 构造function：Initializefilestorepath
+     * @param uploadDir 从 application.properties read的uploaddirectory
      */
     public FileStorageServiceImpl(@Value("${file.upload-dir}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir)
@@ -42,21 +42,21 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String storeFile(MultipartFile file) {
-        // 1. 获取并清理原始文件名
+        // 1. Get并清理originalfile名
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-        // 2. 生成唯一文件名（防止同名覆盖）
+        // 2. generateuniquefile名（prevent同名覆盖）
         String uniqueFileName = generateUniqueFileName(originalFileName);
 
         try {
-            // 3. 检查文件名是否包含非法字符
+            // 3. Checkfile名是否includeillegal字符
             validateFileName(uniqueFileName);
 
-            // 4. 将文件保存到目标位置
+            // 4. 将filesave到目标位置
             Path targetLocation = this.fileStorageLocation.resolve(uniqueFileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            // 5. 返回生成的文件名
+            // 5. returngenerate的file名
             return uniqueFileName;
 
         } catch (IOException ex) {
@@ -83,18 +83,18 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 生成唯一文件名
-     * @param originalFileName 原始文件名
-     * @return UUID + 原始文件名
+     * generateuniquefile名
+     * @param originalFileName originalfile名
+     * @return UUID + originalfile名
      */
     private String generateUniqueFileName(String originalFileName) {
         return UUID.randomUUID().toString() + "-" + originalFileName;
     }
 
     /**
-     * 验证文件名是否合法
-     * @param fileName 文件名
-     * @throws RuntimeException 如果文件名包含非法字符
+     * Validatefile名是否legal
+     * @param fileName file名
+     * @throws RuntimeException Iffile名includeillegal字符
      */
     private void validateFileName(String fileName) {
         if (fileName.contains("..")) {

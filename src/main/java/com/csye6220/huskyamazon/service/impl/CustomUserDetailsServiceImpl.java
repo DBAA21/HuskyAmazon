@@ -30,8 +30,8 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
 
-        // 将我们的 User 转换成 Spring Security 的 UserDetails
-        // 关键点：添加 ROLE_ 前缀，这是 Spring Security 的规范
+        // 将我们的 User convert成 Spring Security 的 UserDetails
+        // Key点：Add ROLE_ 前缀，这是 Spring Security 的规范
         String role = "ROLE_" + (user.getRole() != null ? user.getRole() : "USER");
 
         return new org.springframework.security.core.userdetails.User(

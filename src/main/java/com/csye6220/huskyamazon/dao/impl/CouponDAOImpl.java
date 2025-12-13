@@ -26,7 +26,7 @@ public class CouponDAOImpl implements CouponDAO {
 
     @Override
     public void save(Coupon coupon) {
-        // merge 可以处理新建(insert)和更新(update)
+        // merge canHandle新建(insert)和Update(update)
         getCurrentSession().merge(coupon);
     }
 

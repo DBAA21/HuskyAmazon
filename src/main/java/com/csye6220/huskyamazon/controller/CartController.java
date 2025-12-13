@@ -52,7 +52,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // --- ⭐ 新增：处理更新数量请求 ---
+    // --- ⭐ New：HandleUpdatequantityrequest ---
     @PostMapping("/update")
     public String updateQuantity(@RequestParam Long productId,
                                  @RequestParam int quantity,

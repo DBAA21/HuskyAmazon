@@ -20,7 +20,7 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final UserService userService; // 注入 UserService 以支持 Security
+    private final UserService userService; // Inject UserService 以support Security
 
     @Autowired
     public OrderController(OrderService orderService, UserService userService) {
@@ -28,22 +28,22 @@ public class OrderController {
         this.userService = userService;
     }
 
-    // 1. 旧的结账接口 (修正报错)
+    // 1. 旧的结账interface (修正报错)
     // 建议：去 cart.html 把 action 改成 /checkout/payment
-    // 这里我们做一个兼容：如果还在用旧链接，直接重定向到新支付页
+    // 这里我们做一个兼容：If还在用旧link，直接重定向到新支付page
     @PostMapping("/checkout")
     public String checkout() {
-        // ⭐ 修正逻辑：不再直接下单，而是导向新的支付+优惠券页面
+        // ⭐ 修正逻辑：不再直接下单，而是导向新的支付+couponpage面
         return "redirect:/checkout/payment";
     }
 
-    /* 如果你非要保留“一键直接下单” (不推荐)，请用下面的代码替换上面的 checkout 方法：
+    /* If你非要Keep“一键直接下单” (不推荐)，请用下面的代码替换上面的 checkout method：
 
     @PostMapping("/checkout")
     public String checkout(Principal principal) {
         User user = userService.findByUsername(principal.getName());
         try {
-            // ⭐ 修复报错关键点：传入 null 作为优惠券参数
+            // ⭐ 修复报错Key点：传入 null 作为couponparameters
             orderService.placeOrder(user, null);
             return "redirect:/order/history?success";
         } catch (Exception e) {
@@ -52,10 +52,10 @@ public class OrderController {
     }
     */
 
-    // 2. 显示历史订单 (适配 Spring Security)
+    // 2. display历史order (适配 Spring Security)
     @GetMapping("/history")
     public String showOrderHistory(Model model, Principal principal) {
-        // 使用 Principal 获取当前登录用户 (比 Session 更稳健)
+        // 使用 Principal Getcurrentloginuser (比 Session 更稳健)
         if (principal == null) {
             return "redirect:/login";
         }
@@ -64,6 +64,6 @@ public class OrderController {
         List<Order> orders = orderService.getOrderHistory(user);
         model.addAttribute("orders", orders);
 
-        return "order-history"; // 确保你有 templates/order-history.html
+        return "order-history"; // ensure你有 templates/order-history.html
     }
 }

@@ -40,7 +40,7 @@ public class ProductController {
         model.addAttribute("product", product);
         model.addAttribute("reviews", reviews);
 
-        // 加载收藏状态 & 记录历史
+        // loadfavoritestate & record历史
         if (principal != null) {
             User user = userService.findByUsername(principal.getName());
             boolean isFavorite = wishlistService.isProductInWishlist(user, product);
@@ -48,7 +48,7 @@ public class ProductController {
             productService.recordViewHistory(user, id);
         }
 
-        // ⭐⭐ 核心修改：获取推荐商品 (Bought Together) ⭐⭐
+        // ⭐⭐ CoreModified：Get推荐product (Bought Together) ⭐⭐
         List<Product> recommendedProducts = productService.getRecommendedProducts(id);
         model.addAttribute("recommendedProducts", recommendedProducts);
 

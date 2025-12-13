@@ -27,7 +27,7 @@ public class ProductDAOImpl implements ProductDAO {
         return entityManager.unwrap(Session.class);
     }
 
-    // ... (保留原有的 save, findById, findAll, update, delete, searchProducts 等方法) ...
+    // ... (Keep原有的 save, findById, findAll, update, delete, searchProducts 等method) ...
     @Override public void save(Product product) { getCurrentSession().persist(product); }
     @Override public Product findById(Long id) { return getCurrentSession().get(Product.class, id); }
     @Override public List<Product> findAll() { return getCurrentSession().createQuery("from Product", Product.class).list(); }
@@ -41,7 +41,7 @@ public class ProductDAOImpl implements ProductDAO {
         return query.list();
     }
 
-    // ... (保留 findWithFilters 和 countWithFilters 方法) ...
+    // ... (Keep findWithFilters 和 countWithFilters method) ...
     private void applyFilters(StringBuilder hql, List<String> conditions, Map<String, Object> parameters, Map<String, Object> filters) {
         if (filters.containsKey("categoryId")) { conditions.add("p.category.id = :catId"); parameters.put("catId", filters.get("categoryId")); }
         if (filters.containsKey("maxPrice")) { conditions.add("p.price <= :maxPrice"); parameters.put("maxPrice", filters.get("maxPrice")); }
@@ -78,14 +78,14 @@ public class ProductDAOImpl implements ProductDAO {
         return query.uniqueResult();
     }
 
-    // --- ⭐ 实现推荐算法 ---
+    // --- ⭐ implement推荐算法 ---
     @Override
     public List<Product> findFrequentlyBoughtTogether(Long productId, int limit) {
         // SQL 逻辑：
-        // 1. SELECT sub_oi.order.id ... WHERE sub_oi.product.id = :pid -> 找到包含当前商品的所有订单
-        // 2. SELECT p FROM OrderItem oi JOIN oi.product p -> 找到这些订单里的商品
-        // 3. WHERE oi.order.id IN (...) AND p.id != :pid -> 排除当前商品自己
-        // 4. GROUP BY p.id ORDER BY count(...) DESC -> 按出现频率排序
+        // 1. SELECT sub_oi.order.id ... WHERE sub_oi.product.id = :pid -> 找到includecurrentproduct的allorder
+        // 2. SELECT p FROM OrderItem oi JOIN oi.product p -> 找到这些order里的product
+        // 3. WHERE oi.order.id IN (...) AND p.id != :pid -> 排除currentproduct自己
+        // 4. GROUP BY p.id ORDER BY count(...) DESC -> 按出现频率sort
 
         String hql = "SELECT p FROM OrderItem oi " +
                 "JOIN oi.product p " +

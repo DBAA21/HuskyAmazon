@@ -26,7 +26,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public void addAddress(User user, Address address) {
-        // 确保关联到的是持久化状态的 User
+        // ensureassociation到的是persistencestate的 User
         User managedUser = userDAO.findById(user.getId());
         address.setUser(managedUser);
         addressDAO.save(address);
@@ -36,7 +36,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void deleteAddress(Long addressId, User user) {
         Address address = addressDAO.findById(addressId);
-        // 安全检查：确保只能删除自己的地址
+        // securityCheck：ensure只能Delete自己的address
         if (address != null && address.getUser().getId().equals(user.getId())) {
             addressDAO.delete(address);
         } else {

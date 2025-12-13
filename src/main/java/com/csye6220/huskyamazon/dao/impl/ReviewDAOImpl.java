@@ -31,7 +31,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 
     @Override
     public List<Review> findByProductId(Long productId) {
-        // "fetch join r.user" 强制 Hibernate 在一条 SQL 里把 User 信息也查出来，避免 N+1 查询
+        // "fetch join r.user" 强制 Hibernate 在一item SQL 里把 User info也查出来，avoid N+1 Query
         Query<Review> query = getCurrentSession().createQuery(
                 "from Review r join fetch r.user where r.product.id = :pid order by r.createdAt desc", Review.class);
         query.setParameter("pid", productId);

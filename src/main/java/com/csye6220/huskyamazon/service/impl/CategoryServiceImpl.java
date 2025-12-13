@@ -39,13 +39,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * ⭐ 删除分类
-     * 注意：删除前应检查该分类下是否有商品
+     * ⭐ Deletecategory
+     * Note：Delete前应Check该category下是否有product
      */
     @Override
     @Transactional
     public void deleteCategory(Long id) {
-        // 方式2: 删除前检查是否存在（更安全）
+        // 方式2: Delete前Check是否存在（更security）
         Category category = categoryDAO.findById(id);
         if (category == null) {
              throw new RuntimeException("Category not found with id: " + id);

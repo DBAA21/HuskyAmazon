@@ -37,12 +37,12 @@ public class WishlistServiceImpl implements WishlistService {
         Wishlist item = wishlistDAO.findByUserAndProduct(user.getId(), productId);
 
         if (item == null) {
-            // 不存在 -> 添加收藏
+            // doesn't exist -> Addfavorite
             Product product = productDAO.findById(productId);
             if (product == null) throw new RuntimeException("Product not found");
             wishlistDAO.save(new Wishlist(user, product));
         } else {
-            // 已存在 -> 取消收藏
+            // already exists -> cancelfavorite
             wishlistDAO.delete(item);
         }
     }
@@ -54,7 +54,7 @@ public class WishlistServiceImpl implements WishlistService {
     }
 
     /**
-     * ⭐ 检查商品是否在用户的心愿单中
+     * ⭐ Checkproduct是否在user的心愿单中
      */
     @Override
     @Transactional(readOnly = true)

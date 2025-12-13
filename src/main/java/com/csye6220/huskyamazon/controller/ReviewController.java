@@ -33,11 +33,11 @@ public class ReviewController {
         try {
             reviewService.addReview(user, productId, rating, comment);
         } catch (Exception e) {
-            // 简单处理，可以优化为带错误信息
+            // simpleHandle，canoptimization为带errorinfo
             return "redirect:/product/" + productId + "?reviewError";
         }
 
-        // 提交评论后，重定向回商品详情页
+        // commitreview后，重定向回product详情page
         return "redirect:/product/" + productId;
     }
 }

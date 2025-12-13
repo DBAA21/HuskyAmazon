@@ -8,6 +8,6 @@ public interface OrderDAO {
     void save(Order order);
     Order findById(Long id);
     List<Order> findByUser(User user);
-    List<Order> findAll(); // 新增
+    List<Order> findAll(); // New
     void update(Order order);
 }

@@ -45,7 +45,7 @@ public class CartDAOImpl implements CartDAO {
 
     @Override
     public Cart findByUser(User user) {
-        // HQL: 根据用户ID查找购物车
+        // HQL: 根据userIDFindcart
         Query<Cart> query = getCurrentSession().createQuery("from Cart where user.id = :uid", Cart.class);
         query.setParameter("uid", user.getId());
         return query.uniqueResult();

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ProductDAO {
-    // ... (其他方法保持不变) ...
+    // ... (其他methodremain unchanged) ...
     void save(Product product);
     Product findById(Long id);
     List<Product> findAll();
@@ -13,12 +13,12 @@ public interface ProductDAO {
     void delete(Product product);
     List<Product> searchProducts(String keyword);
 
-    // ⭐ 修改签名：支持分页和排序
+    // ⭐ Modifiedsignature：supportpagination和sort
     List<Product> findWithFilters(Map<String, Object> filters, int page, int size, String sortBy);
 
-    // ⭐ 新增：计算总条数 (用于前端计算页码)
+    // ⭐ New：calculatetotalitem数 (used forfrontendcalculatepage number)
     long countWithFilters(Map<String, Object> filters);
 
-    // --- ⭐ 新增：查找经常一起购买的商品 ---
+    // --- ⭐ New：Find经常一起购买的product ---
     List<Product> findFrequentlyBoughtTogether(Long productId, int limit);
 }

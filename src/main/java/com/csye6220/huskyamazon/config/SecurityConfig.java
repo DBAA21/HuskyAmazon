@@ -1,6 +1,7 @@
 package com.csye6220.huskyamazon.config;
 
-import com.csye6220.huskyamazon.service.impl.CustomUserDetailsServiceImpl;
+// ⭐ 修正引用：根据之前的文件上下文，类名应该是 CustomUserDetailsService
+import com.csye6220.huskyamazon.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,9 +16,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CustomUserDetailsServiceImpl userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
-    public SecurityConfig(CustomUserDetailsServiceImpl userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -25,17 +26,25 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // 1. 放行静态资源和公开页面
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()
-                        .requestMatchers("/", "/home", "/search", "/product/**", "/register", "/login").permitAll()
-                        // 2. 后台管理限制 ADMIN
+                        // 1. 静态资源 (全部放行)
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**", "/error").permitAll()
+
+                        // 2. 公开页面 (首页, 搜索, 注册, 登录, 商品详情) -> 全部放行
+                        // ⭐ 关键：增加了 /filter 和 /category/** 确保游客可以筛选
+                        .requestMatchers("/", "/home", "/index", "/register", "/login").permitAll()
+                        .requestMatchers("/search", "/filter", "/product/**", "/category/**").permitAll()
+
+                        // 3. 后台管理 -> 只有 ADMIN 能进
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // 3. 其他所有页面需要登录 (USER 或 ADMIN)
+
+                        // 4. 其他页面 (购物车, 订单) -> 必须登录
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // 指定自定义登录页
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login") // 处理前端 POST /login 请求
                         .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error")
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -43,17 +52,20 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
-                // 开启 Remember-Me (Cookie)
+                // 5. 记住我功能 (Cookie)
                 .rememberMe(remember -> remember
                         .key("mySecretKey")
-                        .tokenValiditySeconds(86400)
+                        .tokenValiditySeconds(86400) // 24小时
                         .userDetailsService(userDetailsService)
                 );
 
         return http.build();
     }
 
-    // 开发环境使用明文密码 (生产环境请换成 BCrypt)
+    // 6. 密码编码器
+    // 为了兼容你现有的明文密码数据，我们使用 NoOpPasswordEncoder
+    // (注意：生产环境建议换成 BCryptPasswordEncoder)
+    @SuppressWarnings("deprecation")
     @Bean
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();

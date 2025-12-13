@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 商品服务实现类
+ * productserviceimplementation class
  * <p>
- * 负责处理商品相关的核心业务逻辑，包括商品查询、搜索、分类管理、
- * 浏览历史记录、商品推荐、分页查询等功能
+ * responsible forHandleproduct相关的Corebusiness logic，包括productQuery、search、category管理、
+ * view historyrecord、product推荐、paginationQuery等功能
  * </p>
  *
  * @author HuskyAmazon Team
@@ -45,65 +45,65 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 记录用户浏览历史（核心业务逻辑）
+     * recorduserview history（Corebusiness logic）
      * <p>
-     * 用于实现"最近浏览"功能，核心逻辑：
-     * 1. 未登录用户不记录浏览历史
-     * 2. 检查用户是否已浏览过该商品
-     * 3. 如果已浏览过，更新浏览时间（保证该商品在浏览历史中排到最前）
-     * 4. 如果未浏览过，新增浏览记录
+     * used forimplement"最近浏览"功能，Core逻辑：
+     * 1. 未loginuser不recordview history
+     * 2. Checkuser是否已浏览过该product
+     * 3. If已浏览过，Update浏览time（guarantee该product在view history中排到最前）
+     * 4. If未浏览过，New浏览record
      * </p>
      *
-     * @param user      当前用户（可为null）
-     * @param productId 商品ID
-     * @apiNote 使用"更新时间"而非"插入新记录"的方式，避免同一商品重复出现在浏览历史中
+     * @param user      currentuser（可为null）
+     * @param productId productID
+     * @apiNote 使用"Updatetime"而非"insert新record"的方式，avoid同一product重复出现在view history中
      */
     @Override
     @Transactional
     public void recordViewHistory(User user, Long productId) {
-        if (user == null) return; // 未登录不记录
+        if (user == null) return; // 未login不record
 
         Product product = productDAO.findById(productId);
         if (product == null) return;
 
-        // 检查数据库中是否已存在该用户对该商品的浏览记录
+        // Checkdatabase中是否already exists该user对该product的浏览record
         ViewHistory history = viewHistoryDAO.findByUserAndProductId(user, productId);
 
         if (history != null) {
-            // 已存在记录：只更新浏览时间为当前时间（排序时会排到最前面）
+            // already existsrecord：只Update浏览time为currenttime（sort时会排到最前面）
             history.setViewedAt(LocalDateTime.now());
-            viewHistoryDAO.save(history); // update操作
+            viewHistoryDAO.save(history); // updateOperation
         } else {
-            // 不存在记录：插入新的浏览历史
+            // doesn't existrecord：insert新的view history
             ViewHistory newHistory = new ViewHistory(user, product);
-            viewHistoryDAO.save(newHistory); // insert操作
+            viewHistoryDAO.save(newHistory); // insertOperation
         }
     }
 
     /**
-     * 获取用户最近浏览的商品列表
+     * Getuser最近浏览的productcolumntable
      * <p>
-     * 核心业务逻辑：
-     * 1. 按浏览时间倒序获取前6条记录
-     * 2. 过滤掉3天以前的浏览记录（只显示近期浏览）
-     * 3. 提取商品对象返回
+     * Corebusiness logic：
+     * 1. 按浏览time倒序Get前6itemrecord
+     * 2. 过滤掉3天以前的浏览record（只display近期浏览）
+     * 3. extractproductobjectreturn
      * </p>
      *
-     * @param user 当前用户
-     * @return 最近浏览的商品列表（最多6个，且在3天内）
+     * @param user currentuser
+     * @return 最近浏览的productcolumntable（最多6个，且在3天内）
      */
     @Override
     @Transactional(readOnly = true)
     public List<Product> getViewHistory(User user) {
         if (user == null) return new ArrayList<>();
 
-        // 使用分页查询，只取前6条记录（性能优化）
+        // 使用paginationQuery，只取前6itemrecord（performanceoptimization）
         List<ViewHistory> histories = viewHistoryDAO.findByUserOrderByViewedAtDesc(user, PageRequest.of(0, 6));
 
-        // 时间截止点：只显示最近3天内的浏览记录
+        // time截止点：只display最近3天内的浏览record
         LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
 
-        // 从ViewHistory对象中提取Product对象并过滤
+        // 从ViewHistoryobject中extractProductobject并过滤
         return histories.stream()
                 .filter(h -> h.getViewedAt() != null && !h.getViewedAt().isBefore(cutoff))
                 .map(ViewHistory::getProduct)
@@ -123,10 +123,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 根据关键词搜索商品
+     * 根据Key词searchproduct
      *
-     * @param keyword 搜索关键词（在商品名称和描述中搜索）
-     * @return 匹配的商品列表
+     * @param keyword searchKey词（在productname和description中search）
+     * @return match的productcolumntable
      */
     @Override
     @Transactional(readOnly = true)
@@ -147,11 +147,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 添加新商品
+     * Add新product
      *
-     * @param product    商品对象
-     * @param categoryId 所属分类ID
-     * @throws RuntimeException 分类不存在时抛出异常
+     * @param product    productobject
+     * @param categoryId 所属categoryID
+     * @throws RuntimeException categorydoesn't exist时throw exception
      */
     @Override
     @Transactional
@@ -163,11 +163,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 更新商品信息
+     * Updateproductinfo
      *
-     * @param product    更新后的商品对象
-     * @param categoryId 所属分类ID
-     * @throws RuntimeException 分类不存在时抛出异常
+     * @param product    Update后的productobject
+     * @param categoryId 所属categoryID
+     * @throws RuntimeException categorydoesn't exist时throw exception
      */
     @Override
     @Transactional
@@ -179,9 +179,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 删除商品
+     * Deleteproduct
      *
-     * @param id 商品ID
+     * @param id productID
      */
     @Override
     @Transactional
@@ -191,10 +191,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 根据筛选条件获取商品列表
+     * 根据filteritem件Getproductcolumntable
      *
-     * @param filters 筛选条件（如分类、价格区间等）
-     * @return 符合条件的商品列表
+     * @param filters filteritem件（如category、price区间等）
+     * @return 符合item件的productcolumntable
      */
     @Override
     public List<Product> getProductsWithFilters(Map<String, Object> filters) {
@@ -202,30 +202,30 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 获取带分页的商品列表（核心业务逻辑）
+     * Get带pagination的productcolumntable（Corebusiness logic）
      * <p>
-     * 用于商品列表页的分页展示，包含完整的分页信息
+     * used forproductcolumntablepage的pagination展示，includecomplete的paginationinfo
      * </p>
      *
-     * @param filters 筛选条件（分类、价格区间、关键词等）
-     * @param page    当前页码（从1开始）
-     * @param size    每页显示数量
-     * @param sortBy  排序方式（newest-最新, price-价格等）
-     * @return 包含商品列表、当前页、总页数、总数量的Map对象
+     * @param filters filteritem件（category、price区间、Key词等）
+     * @param page    currentpage number（从1start）
+     * @param size    每pagedisplayquantity
+     * @param sortBy  sort方式（newest-latest, price-price等）
+     * @return includeproductcolumntable、currentpage、totalpage数、totalquantity的Mapobject
      */
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> getProductsWithPagination(Map<String, Object> filters, int page, int size, String sortBy) {
-        // 获取当前页的商品列表
+        // Getcurrentpage的productcolumntable
         List<Product> products = productDAO.findWithFilters(filters, page, size, sortBy);
         
-        // 获取符合条件的商品总数
+        // Get符合item件的producttotal数
         long totalItems = productDAO.countWithFilters(filters);
         
-        // 计算总页数
+        // calculatetotalpage数
         int totalPages = (int) Math.ceil((double) totalItems / size);
         
-        // 组装返回结果
+        // assemblereturn结果
         Map<String, Object> result = new HashMap<>();
         result.put("products", products);
         result.put("currentPage", page);
@@ -235,20 +235,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * 获取商品推荐列表（核心业务逻辑）
+     * Getproduct推荐columntable（Corebusiness logic）
      * <p>
-     * 基于"购买关联分析"，推荐经常一起购买的商品
-     * 用于商品详情页的"买了此商品的人还买了"功能
+     * based on"购买associationanalysis"，推荐经常一起购买的product
+     * used forproduct详情page的"买了此product的人还买了"功能
      * </p>
      *
-     * @param productId 当前商品ID
-     * @return 推荐的商品列表（最多4个）
-     * @apiNote 推荐算法基于历史订单数据分析，计算商品共同购买频率
+     * @param productId currentproductID
+     * @return 推荐的productcolumntable（最多4个）
+     * @apiNote 推荐算法based on历史order数据analysis，calculateproduct共同购买频率
      */
     @Override
     @Transactional(readOnly = true)
     public List<Product> getRecommendedProducts(Long productId) {
-        // 获取前4个推荐商品（基于购买关联度排序）
+        // Get前4个推荐product（based on购买association度sort）
         return productDAO.findFrequentlyBoughtTogether(productId, 4);
     }
 }

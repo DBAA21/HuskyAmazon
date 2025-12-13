@@ -41,12 +41,12 @@ public class WishlistDAOImpl implements WishlistDAO {
                 "from Wishlist where user.id = :uid and product.id = :pid", Wishlist.class);
         query.setParameter("uid", userId);
         query.setParameter("pid", productId);
-        return query.uniqueResult(); // 找不到就返回 null
+        return query.uniqueResult(); // 找不到就return null
     }
 
     @Override
     public List<Wishlist> findByUser(User user) {
-        // 使用 "fetch join" 一次性查出商品信息，防止N+1查询
+        // 使用 "fetch join" 一次性查出productinfo，preventN+1Query
         Query<Wishlist> query = getCurrentSession().createQuery(
                 "from Wishlist w join fetch w.product where w.user.id = :uid", Wishlist.class);
         query.setParameter("uid", user.getId());

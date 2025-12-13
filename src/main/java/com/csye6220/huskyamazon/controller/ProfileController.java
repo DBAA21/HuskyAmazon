@@ -1,6 +1,6 @@
 package com.csye6220.huskyamazon.controller;
 
-// ... (Imports 保持不变) ...
+// ... (Imports remain unchanged) ...
 import com.csye6220.huskyamazon.entity.Address;
 import com.csye6220.huskyamazon.entity.Order;
 import com.csye6220.huskyamazon.entity.User;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping("/profile")
 public class ProfileController {
 
-    // ... (Fields 和 Constructor 保持不变) ...
+    // ... (Fields 和 Constructor remain unchanged) ...
     private final UserService userService;
     private final AddressService addressService;
     private final OrderService orderService;
@@ -37,7 +37,7 @@ public class ProfileController {
         this.wishlistService = wishlistService;
     }
 
-    // ... (保留 viewProfile, addAddress, deleteAddress 方法) ...
+    // ... (Keep viewProfile, addAddress, deleteAddress method) ...
     @GetMapping
     public String viewProfile(HttpSession session, Model model) {
         User user = (User) session.getAttribute("currentUser");
@@ -76,7 +76,7 @@ public class ProfileController {
         return "redirect:/profile#addresses";
     }
 
-    // --- ⭐ 新增：处理修改密码 ---
+    // --- ⭐ New：HandleModifiedpassword ---
     @PostMapping("/password/change")
     public String changePassword(@RequestParam String oldPassword,
                                  @RequestParam String newPassword,

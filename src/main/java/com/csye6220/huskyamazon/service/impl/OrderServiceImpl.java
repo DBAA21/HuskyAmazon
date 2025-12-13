@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 订单服务实现类
+ * orderserviceimplementation class
  * <p>
- * 负责处理订单相关的核心业务逻辑，包括订单创建、优惠券验证、
- * 库存扣减、订单查询和状态更新等功能
+ * responsible forHandleorder相关的Corebusiness logic，包括orderCreate、couponValidate、
+ * stock扣减、orderQuery和stateUpdate等功能
  * </p>
  *
  * @author HuskyAmazon Team
@@ -38,26 +38,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 创建订单（核心业务逻辑）
+     * Createorder（Corebusiness logic）
      * <p>
-     * 完整的下单流程包括：
-     * 1. 验证购物车不为空
-     * 2. 计算原始总价
-     * 3. 应用优惠券（二次验证有效性、最低消费金额）
-     * 4. 创建订单对象，设置折后价格
-     * 5. 扣减商品库存（原子操作，库存不足则抛异常回滚）
-     * 6. 生成订单明细（记录购买时的价格）
-     * 7. 保存订单并清空购物车
+     * complete的下单流程包括：
+     * 1. Validatecart不为空
+     * 2. calculateoriginaltotal价
+     * 3. 应用coupon（二次Validatevalid性、最低消费amount）
+     * 4. Createorderobject，settings折后price
+     * 5. 扣减productstock（atomicOperation，stock不足则抛exceptionrollback）
+     * 6. generateorder明细（record购买时的price）
+     * 7. saveorder并Clearcart
      * </p>
      *
-     * @param user   下单用户
-     * @param coupon 使用的优惠券（可为null）
-     * @return 创建成功的订单对象
-     * @throws RuntimeException 购物车为空、优惠券无效、库存不足时抛出异常
-     * @apiNote 整个流程在一个事务中执行，任何步骤失败都会回滚，保证数据一致性
+     * @param user   下单user
+     * @param coupon 使用的coupon（可为null）
+     * @return Createsuccessful的orderobject
+     * @throws RuntimeException cart为空、couponinvalid、stock不足时throw exception
+     * @apiNote entire流程在一个transaction中Execute，任何步骤fail都会rollback，guarantee数据consistent性
      */
     @Override
-    @Transactional // 关键：整个下单流程必须在事务中，保证原子性（要么全部成功，要么全部回滚）
+    @Transactional // Key：entire下单流程must在transaction中，guaranteeatomic性（要么allsuccessful，要么allrollback）
     public Order placeOrder(User user, Coupon coupon) {
         Cart cart = cartService.getCartByUser(user);
 
@@ -65,73 +65,73 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Cart is empty");
         }
 
-        // ========== 第一步：计算原始总价 ==========
+        // ========== 第一步：calculateoriginaltotal价 ==========
         double originalTotal = cart.getTotalAmount();
         double finalTotal = originalTotal;
         String statusMessage = "PLACED";
 
-        // ========== 第二步：应用优惠券折扣（二次验证） ==========
+        // ========== 第二步：应用coupondiscount（二次Validate） ==========
         if (coupon != null) {
-            // 再次验证有效性（防止Session中存储的优惠券已过期）
+            // 再次Validatevalid性（preventSession中store的coupon已expired）
             if (!coupon.isValid()) {
                 throw new RuntimeException("Coupon expired.");
             }
-            // 验证是否满足最低消费金额
+            // Validate是否满足最低消费amount
             if (coupon.getMinSpend() != null && originalTotal < coupon.getMinSpend()) {
                 throw new RuntimeException("Did not meet minimum spend for coupon.");
             }
 
-            // 计算折扣金额和最终价格
+            // calculatediscountamount和finalprice
             double discountAmount = originalTotal * coupon.getDiscountPercent();
             finalTotal = originalTotal - discountAmount;
 
-            // 在订单状态中记录使用的优惠券（后续可优化为关联字段）
+            // 在orderstate中record使用的coupon（后续可optimization为associationfield）
             statusMessage = "PLACED (Coupon: " + coupon.getCode() + ")";
         }
 
-        // ========== 第三步：创建订单对象 ==========
+        // ========== 第三步：Createorderobject ==========
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(statusMessage);
-        order.setTotalAmount(finalTotal); // 重要：存储的是优惠后的实际支付金额
+        order.setTotalAmount(finalTotal); // Important：store的是discount后的actual支付amount
         order.setOrderItems(new ArrayList<>());
 
-        // ========== 第四步：扣减库存并生成订单明细 ==========
+        // ========== 第四步：扣减stock并generateorder明细 ==========
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
             int qty = cartItem.getQuantity();
 
-            // 库存校验（防止超卖）
+            // stockchecksum（prevent超卖）
             if (product.getStock() < qty) {
                 throw new RuntimeException("Product " + product.getName() + " is out of stock.");
             }
 
-            // 扣减库存（关键业务逻辑）
+            // 扣减stock（Keybusiness logic）
             product.setStock(product.getStock() - qty);
             productDAO.update(product);
 
-            // 创建订单明细（记录购买时的价格，防止后续商品调价影响历史订单）
+            // Createorder明细（record购买时的price，prevent后续product调价影响历史order）
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
             orderItem.setQuantity(qty);
-            orderItem.setPriceAtPurchase(product.getPrice()); // 保存购买时的单价
+            orderItem.setPriceAtPurchase(product.getPrice()); // save购买时的unit price
             orderItem.setOrder(order);
             order.getOrderItems().add(orderItem);
         }
 
-        // ========== 第五步：保存订单并清空购物车 ==========
+        // ========== 第五步：saveorder并Clearcart ==========
         orderDAO.save(order);
-        cartService.clearCart(user); // 下单成功后清空购物车
+        cartService.clearCart(user); // 下单successful后Clearcart
 
         return order;
     }
 
     /**
-     * 获取用户的订单历史
+     * Getuser的order历史
      *
-     * @param user 查询的用户
-     * @return 该用户的所有订单列表
+     * @param user Query的user
+     * @return 该user的allordercolumntable
      */
     @Override
     @Transactional(readOnly = true)
@@ -140,10 +140,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 获取订单详情
+     * Getorder详情
      *
-     * @param orderId 订单ID
-     * @return 订单详情对象（包含订单明细）
+     * @param orderId orderID
+     * @return order详情object（includeorder明细）
      */
     @Override
     @Transactional(readOnly = true)
@@ -152,9 +152,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 获取所有订单（管理员功能）
+     * Getallorder（administrator功能）
      *
-     * @return 系统中的所有订单列表
+     * @return 系统中的allordercolumntable
      */
     @Override
     @Transactional(readOnly = true)
@@ -163,13 +163,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 更新订单状态（管理员功能）
+     * Updateorderstate（administrator功能）
      * <p>
-     * 用于订单流转管理，如：PLACED -> SHIPPED -> DELIVERED
+     * used fororder流转管理，如：PLACED -> SHIPPED -> DELIVERED
      * </p>
      *
-     * @param orderId 订单ID
-     * @param status  新的订单状态
+     * @param orderId orderID
+     * @param status  新的orderstate
      */
     @Override
     @Transactional

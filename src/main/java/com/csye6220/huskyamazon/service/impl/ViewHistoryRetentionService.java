@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * 保留策略：仅保留最近3天的浏览历史。
- * 每天定时清理一次早于3天的记录。
+ * Keepstrategy：仅Keep最近3天的view history。
+ * 每天定时清理一次早于3天的record。
  */
 @Service
 public class ViewHistoryRetentionService {

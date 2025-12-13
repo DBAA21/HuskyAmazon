@@ -27,7 +27,7 @@ public class WishlistController {
 
         wishlistService.toggleFavorite(user, productId);
 
-        // 操作完重定向回商品页
+        // Operation完重定向回productpage
         return "redirect:/product/" + productId;
     }
 }

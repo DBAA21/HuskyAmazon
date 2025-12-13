@@ -15,7 +15,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
-    // 从配置文件读取发送者邮箱
+    // 从configurationfilereadsend者email
     @Value("${spring.mail.username:noreply@huskyamazon.com}")
     private String fromEmail;
 
@@ -25,7 +25,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    @Async // 异步执行，防止发邮件卡住主线程
+    @Async // asynchronousExecute，prevent发邮件卡住主thread
     public void sendWelcomeEmail(User user) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -37,9 +37,9 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             mailSender.send(message);
-            System.out.println("✅ 欢迎邮件已发送给: " + user.getEmail());
+            System.out.println("✅ 欢迎邮件已send给: " + user.getEmail());
         } catch (Exception e) {
-            System.err.println("❌ 邮件发送失败: " + e.getMessage());
+            System.err.println("❌ 邮件sendfail: " + e.getMessage());
         }
     }
 
@@ -59,9 +59,9 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             mailSender.send(message);
-            System.out.println("✅ 订单确认邮件已发送给: " + user.getEmail());
+            System.out.println("✅ order确认邮件已send给: " + user.getEmail());
         } catch (Exception e) {
-            System.err.println("❌ 邮件发送失败: " + e.getMessage());
+            System.err.println("❌ 邮件sendfail: " + e.getMessage());
         }
     }
 }

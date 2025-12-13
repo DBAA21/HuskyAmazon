@@ -13,11 +13,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 映射 URL 路径 "/uploads/**" 到本地文件系统目录
+        // Map the URL path "/uploads/**" to a local file system directory.
         // 比如: http://localhost:8080/uploads/abc.jpg -> /Users/dbaa/Documents/HuskyUploads/abc.jpg
 
-        // 注意：Windows 上路径需要以 "file:///" 开头，Mac/Linux 是 "file:"
-        // 为了跨平台，我们可以这样拼：
+        // Note: On Windows, paths need to start with "file:///", while on Mac/Linux it's "file:".
+        // For cross-platform compatibility, we can construct the path like this:
         String resourceLocation = "file:" + uploadDir;
         if (!resourceLocation.endsWith("/")) {
             resourceLocation += "/";
@@ -26,7 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(resourceLocation);
 
-        // 同时保留默认的静态资源映射 (css, js)
+        // While also retaining the default static resource mapping. (css, js)
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/");
     }

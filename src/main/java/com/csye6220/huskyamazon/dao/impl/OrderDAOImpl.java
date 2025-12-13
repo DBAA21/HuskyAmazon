@@ -37,7 +37,7 @@ public class OrderDAOImpl implements OrderDAO {
 
     @Override
     public List<Order> findByUser(User user) {
-        // HQL: 查询属于该用户的所有订单，按日期倒序排列
+        // HQL: Query属于该user的allorder，按date倒序排column
         Query<Order> query = getCurrentSession().createQuery(
                 "from Order where user.id = :uid order by orderDate desc", Order.class);
         query.setParameter("uid", user.getId());
